@@ -152,14 +152,26 @@ main{padding:var(--pad);max-width:640px;margin:0 auto}
 @media (prefers-color-scheme: dark){.day.next .key{color:#1A1D21}}
 
 /* ---------- timer bar ---------- */
+.sessbar{display:none;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.sessbar.on{display:flex}
+.sessbar #hdrback{font-size:15px;color:var(--brass);font-weight:600;padding:4px 10px 4px 0;margin-left:-2px}
+.sessbar .el{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;font-size:17px;color:var(--muted)}
+.sessbar .el b{color:var(--ink);font-weight:600}
+.sess{display:flex;align-items:center;gap:6px;padding:11px var(--pad);border-bottom:1px solid var(--rule)}
+.sess:last-of-type{border-bottom:none}
+.sess-main{flex:1;text-align:left;min-width:0}
+.del-btn{width:40px;height:40px;flex:none;border-radius:10px;color:var(--faint);font-size:17px;border:1px solid var(--rule)}
+.del-btn:active{color:var(--alert);border-color:var(--alert)}
+.badge{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--brass);font-weight:700}
 #timerbar{
   position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));z-index:40;
   display:none;align-items:center;gap:12px;padding:10px var(--pad);
   background:var(--ink);color:var(--ground);
 }
 #timerbar.on{display:flex}
-#timerbar .t{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-variant-numeric:tabular-nums}
-#timerbar button{margin-left:auto;font-size:14px;opacity:.8;text-decoration:underline}
+#timerbar .t{font-family:ui-monospace,Menlo,monospace;font-size:24px;font-variant-numeric:tabular-nums;min-width:62px}
+#timerbar .sp{margin-left:auto;display:flex;gap:8px}
+#timerbar .sp button{padding:9px 14px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font-size:13.5px;font-weight:600}
 
 /* ---------- nav ---------- */
 nav{
@@ -223,6 +235,10 @@ h2.sec:first-child{margin-top:4px}
     <div class="label" id="streak"></div>
   </div>
   <div class="subline" id="subline">Loading…</div>
+  <div class="sessbar" id="sessbar">
+    <button id="hdrback">‹ All days</button>
+    <span class="el">Session <b id="elapsed">0:00</b></span>
+  </div>
 </header>
 
 <main>
@@ -235,7 +251,10 @@ h2.sec:first-child{margin-top:4px}
 <div id="timerbar">
   <span class="label" style="color:inherit;opacity:.7">Rest</span>
   <span class="t" id="tclock">1:30</span>
-  <button id="tstop">Stop</button>
+  <span class="sp">
+    <button id="tplus">+30s</button>
+    <button id="tstop">Skip</button>
+  </span>
 </div>
 
 <nav>
@@ -341,9 +360,9 @@ const DAY_INDEX = {}; PROGRAM.forEach((d,i)=>DAY_INDEX[d.key]=i);
 const EX_INDEX = {}; PROGRAM.forEach(d=>d.exercises.forEach(e=>EX_INDEX[e.id]=e));
 
 /* ---------- 2. STORAGE (local only) ---------- */
-const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="1.4";
+const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="1.5";
 let memoryOnly=false, storageNote="", readError=false;
-let S={schema:1,sessions:[],active:null,lastBackup:null,pending:null,
+let S={schema:2,sessions:[],active:null,lastBackup:null,pending:null,
   settings:{rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}};
 
 /* Every future version of this app runs its saved data through migrate()
@@ -353,7 +372,7 @@ function migrate(d){
   if(!Array.isArray(d.sessions)) d.sessions=[];
   d.settings = Object.assign({rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}, d.settings||{});
   if(d.active && !d.sessions.some(x=>x.id===d.active)) d.active=null;
-  // Future versions add steps here, e.g. if(d.schema<2){ ...; d.schema=2; }
+  if(d.schema<2){ d.settings.timerOn=false; d.schema=2; }   // never leave the app to time a rest
   return d;
 }
 function load(){
@@ -503,13 +522,38 @@ function paintTimer(){
 }
 function stopRest(){ clearInterval(timer); document.getElementById("timerbar").classList.remove("on"); }
 document.getElementById("tstop").onclick=stopRest;
+document.getElementById("tplus").onclick=()=>{ tleft+=30; paintTimer(); };
+
+/* live session clock in the header */
+let elapsedT=null;
+function startElapsed(a){
+  clearInterval(elapsedT);
+  const paint=()=>{
+    const sec=Math.max(0,Math.floor((Date.now()-(a.start||Date.now()))/1000));
+    const m=Math.floor(sec/60);
+    const el=document.getElementById("elapsed");
+    if(el) el.textContent=m+":"+String(sec%60).padStart(2,"0");
+  };
+  paint(); elapsedT=setInterval(paint,1000);
+  document.getElementById("sessbar").classList.add("on");
+}
+function stopElapsed(){
+  clearInterval(elapsedT);
+  document.getElementById("sessbar").classList.remove("on");
+}
+document.getElementById("hdrback").onclick=()=>{
+  S.active=null; stopRest(); stopElapsed(); keepAwake(false); save();
+  renderToday(); window.scrollTo(0,0);
+  toast("Left the workout — it's saved as in progress");
+};
 
 /* ---------- 5. TODAY VIEW ---------- */
 function renderToday(){
   const el=document.getElementById("v-today");
   paintStreak();
   const a=S.active ? S.sessions.find(s=>s.id===S.active) : null;
-  if(!a){ el.innerHTML=dayPicker(); bindPicker(el); document.getElementById("subline").textContent=sublineIdle(); return; }
+  if(!a){ stopElapsed(); el.innerHTML=dayPicker(); bindPicker(el); document.getElementById("subline").textContent=sublineIdle(); return; }
+  startElapsed(a);
   const day=PROGRAM[DAY_INDEX[a.dayId]];
   document.getElementById("subline").textContent=day.title+" · "+day.focus;
 
@@ -542,7 +586,7 @@ function renderToday(){
     </div>`;
   });
   h+=`<button class="btn brass" id="finish">Finish workout</button>
-      <button class="btn ghost" id="scrap">Discard this session</button>`;
+      <button class="btn ghost" id="scrap">Delete this session without saving</button>`;
   el.innerHTML=h;
   bindSession(el,a,day);
 }
@@ -576,13 +620,17 @@ function dayPicker(){
   h+=`<h2 class="sec">Pick today's session</h2><div class="day-list">`;
   PROGRAM.forEach(d=>{
     const last=c.find(s=>s.dayId===d.key);
-    h+=`<button class="day ${d.key===nk?"next":""}" data-day="${d.key}">
+    const wip=S.sessions.find(x=>!x.done && x.dayId===d.key);
+    const nSets=wip?Object.values(wip.entries).reduce((n,x)=>n+x.filter(y=>y.done).length,0):0;
+    h+=`<button class="day ${d.key===nk&&!wip?"next":""}" data-day="${d.key}">
       <span class="key">${d.key}</span>
       <span style="flex:1">
         <span class="t">${esc(d.title)}</span>
-        <span class="s">${esc(d.focus)} · ${d.mins}${last?` · last ${daysAgo(last.date)}`:""}</span>
+        <span class="s">${wip
+          ? `In progress · ${nSets} set${nSets===1?"":"s"} logged`
+          : `${esc(d.focus)} · ${d.mins}${last?` · last ${daysAgo(last.date)}`:""}`}</span>
       </span>
-      ${d.key===nk?'<span class="pr-flag">Next</span>':""}
+      ${wip?'<span class="badge">Resume</span>':(d.key===nk?'<span class="pr-flag">Next</span>':"")}
     </button>`;
   });
   h+=`</div>`;
@@ -615,7 +663,8 @@ function bindPicker(el){
       });
       S.sessions.push(s);
     }
-    S.active=s.id; if(!s.start) s.start=Date.now(); save(); keepAwake(true); renderToday(); window.scrollTo(0,0);
+    if(!s.start || (Date.now()-s.start)>6*36e5) s.start=Date.now();  // stale clock, restart it
+    S.active=s.id; save(); keepAwake(true); renderToday(); window.scrollTo(0,0);
   });
 }
 function bindSession(el,a,day){
@@ -659,7 +708,7 @@ function bindSession(el,a,day){
     Object.keys(a.entries).forEach(id=>{ a.entries[id]=a.entries[id].filter(x=>x.done); if(!a.entries[id].length) delete a.entries[id]; });
     a.done=true; a.date=todayISO();
     a.mins=Math.min(120,Math.max(1,Math.round((Date.now()-(a.start||Date.now()))/6e4)));
-    S.active=null; stopRest(); keepAwake(false);
+    S.active=null; stopRest(); stopElapsed(); keepAwake(false);
     if(S.settings.healthOn) S.pending={mins:a.mins,day:a.dayId};
     save(); snapshot();
     toast("Saved · "+a.mins+" min · "+volume(a).toLocaleString()+" lb moved");
@@ -667,7 +716,7 @@ function bindSession(el,a,day){
   };
   el.querySelector("#scrap").onclick=()=>{
     if(!confirm("Discard this session? Logged sets will be deleted.")) return;
-    S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null; stopRest(); keepAwake(false); save(); renderToday();
+    S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null; stopRest(); stopElapsed(); keepAwake(false); save(); renderToday();
   };
 }
 
@@ -684,21 +733,23 @@ function renderHistory(){
         <div class="card" id="exbox"></div>`;
   }
   h+=`<h2 class="sec">Session log</h2><div class="card">`;
-  if(!c.length) h+=`<div class="sess"><div class="n">No sessions yet</div><div class="v">Your last 200 workouts will live here.</div></div>`;
+  if(!c.length) h+=`<div class="sess"><div class="sess-main"><div class="n">No sessions yet</div><div class="v">Your last 200 workouts will live here.</div></div></div>`;
   c.slice(0,200).forEach(s=>{
     const d=PROGRAM[DAY_INDEX[s.dayId]];
     const nSets=Object.values(s.entries).reduce((n,x)=>n+x.length,0);
-    h+=`<button class="sess" data-s="${s.id}">
-        <div class="d">${fmtDate(s.date)}</div>
-        <div class="n">Day ${s.dayId} — ${esc(d?d.title:"")}</div>
-        <div class="v">${nSets} sets · ${volume(s).toLocaleString()} lb volume</div>
-      </button>
+    h+=`<div class="sess">
+        <div class="sess-main" data-s="${s.id}">
+          <div class="d">${fmtDate(s.date)}</div>
+          <div class="n">Day ${s.dayId} — ${esc(d?d.title:"")}</div>
+          <div class="v">${nSets} sets${s.mins?` · ${s.mins} min`:""} · ${volume(s).toLocaleString()} lb</div>
+        </div>
+        <button class="del-btn" data-del="${s.id}" aria-label="Delete session">✕</button>
+      </div>
       <div class="detail" data-d="${s.id}">
         ${Object.entries(s.entries).map(([id,sets])=>{
           const ex=EX_INDEX[id]||{name:id,unit:"reps"};
           return `<div><b>${esc(ex.name)}</b> — ${sets.map(x=>setStr(x,ex)).join("&nbsp;· ")}</div>`;
         }).join("")}
-        <div><button data-del="${s.id}" style="color:var(--alert);font-size:13px">Delete this session</button></div>
       </div>`;
   });
   h+=`</div>`;
@@ -707,9 +758,12 @@ function renderHistory(){
   el.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
     el.querySelector(`[data-d="${b.dataset.s}"]`).classList.toggle("on");
   });
-  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(!confirm("Delete this session permanently?")) return;
-    S.sessions=S.sessions.filter(s=>s.id!==b.dataset.del); save(); renderHistory(); renderToday();
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=ev=>{
+    ev.stopPropagation();
+    const s0=S.sessions.find(x=>x.id===b.dataset.del);
+    if(!confirm(`Delete the ${fmtDate(s0.date)} session? This can't be undone.`)) return;
+    S.sessions=S.sessions.filter(x=>x.id!==b.dataset.del); save(); renderHistory(); renderToday();
+    toast("Session deleted");
   });
   const pick=el.querySelector("#expick");
   if(pick){ pick.onchange=()=>drawExercise(pick.value); drawExercise(pick.value); }
@@ -849,12 +903,17 @@ function renderData(){
   const snap=readSnapshot();
   const sets=c.reduce((n,s)=>n+Object.values(s.entries).reduce((m,x)=>m+x.length,0),0);
   const vol=c.reduce((n,s)=>n+volume(s),0);
+  const timed=c.filter(s=>s.mins);
+  const mins=timed.reduce((n,s)=>n+s.mins,0);
+  const avg=timed.length?Math.round(mins/timed.length):0;
   document.getElementById("v-data").innerHTML=`
   <h2 class="sec">Your numbers</h2>
   <div class="prose">
     <div class="kv"><span>Sessions logged</span><b class="num">${c.length}</b></div>
     <div class="kv"><span>Sets logged</span><b class="num">${sets}</b></div>
     <div class="kv"><span>Total weight moved</span><b class="num">${vol.toLocaleString()} lb</b></div>
+    <div class="kv"><span>Time trained</span><b class="num">${mins>=60?Math.floor(mins/60)+" h "+(mins%60)+" min":mins+" min"}</b></div>
+    <div class="kv"><span>Average session</span><b class="num">${avg?avg+" min":"—"}</b></div>
     <div class="kv"><span>App version</span><b class="num">${APP_VERSION}</b></div>
   </div>
 
@@ -894,12 +953,12 @@ function renderData(){
   <div class="prose">
     <p>A web app can't ring a locked phone or write to Apple Health. Apple's free <b>Shortcuts</b> app can do both. Build each shortcut once, switch it on here, and this app hands the job over.</p>
     <div class="kv" style="border:none;padding-top:6px">
-      <span><b>Rest timer on the lock screen</b><br><span style="color:var(--muted);font-size:13px">Fires even with the phone locked</span></span>
+      <span><b>Rest timer via Shortcuts</b><br><span style="color:var(--muted);font-size:13px">Rings with the phone locked, but jumps out of this app. Off by default — the built-in timer chimes without leaving.</span></span>
       <button class="tog ${S.settings.timerOn?"on":""}" data-t="timerOn">${S.settings.timerOn?"On":"Off"}</button>
     </div>
     <input class="tin" id="scTimer" value="${esc(S.settings.scTimer)}" placeholder="Shortcut name">
     <div class="kv" style="margin-top:14px">
-      <span><b>Log to Apple Health</b><br><span style="color:var(--muted)">Offered after each workout</span></span>
+      <span><b>Log to Apple Health</b><br><span style="color:var(--muted);font-size:13px">One optional tap after a workout. Never automatic.</span></span>
       <button class="tog ${S.settings.healthOn?"on":""}" data-t="healthOn">${S.settings.healthOn?"On":"Off"}</button>
     </div>
     <input class="tin" id="scHealth" value="${esc(S.settings.scHealth)}" placeholder="Shortcut name">
