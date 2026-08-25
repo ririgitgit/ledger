@@ -92,11 +92,38 @@ main{padding:var(--pad);max-width:640px;margin:0 auto}
 /* ---------- set rows: the ledger ---------- */
 .sets{padding:2px var(--pad) 12px}
 .set-row{
-  display:grid;grid-template-columns:26px 1fr 1fr 46px;gap:8px;align-items:center;
+  display:grid;grid-template-columns:26px 1fr 1fr 46px;gap:6px;align-items:center;
   padding:7px 0;border-top:1px solid var(--rule);position:relative;
 }
+.set-row.warm .stp input{color:var(--faint)}
+.set-row.warm .set-n{background:var(--brass-soft);color:var(--brass);border-radius:6px}
+.stp{display:flex;align-items:center;background:var(--sunk);border-radius:10px;overflow:hidden;border:1px solid transparent}
+.stp button{flex:none;width:34px;height:44px;font-size:19px;color:var(--muted);font-weight:500}
+.stp button:active{background:var(--rule);color:var(--ink)}
+.stp input{
+  flex:1;min-width:0;width:100%;padding:11px 2px;background:none;border:none;text-align:center;font-size:17px;
+  font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;-moz-appearance:textfield;
+}
+.stp input:focus{outline:none}
+.stp:focus-within{border-color:var(--brass)}
+.stp input::-webkit-outer-spin-button,.stp input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stp input::placeholder{color:var(--faint);opacity:1}
+.prbadge{position:absolute;right:52px;top:-4px;background:var(--brass);color:#fff;font-size:9.5px;
+  letter-spacing:.1em;font-weight:800;padding:2px 6px;border-radius:5px}
+@media (prefers-color-scheme: dark){.prbadge{color:#1A1D21}}
+.set-n{font-size:13px;color:var(--faint);height:32px}
+.done-card .card-head{padding-bottom:14px}
+.bar{display:flex;align-items:center;gap:10px;padding:5px 0}
+.bn{font-size:13.5px;width:88px;flex:none;color:var(--muted)}
+.bt{flex:1;height:9px;background:var(--sunk);border-radius:5px;overflow:hidden}
+.bt i{display:block;height:100%;border-radius:5px}
+.bv{font-size:13.5px;width:22px;text-align:right;font-weight:600}
+.grid{display:flex;gap:5px;justify-content:space-between}
+.wk{display:flex;flex-direction:column;gap:5px;flex:1}
+.wk i{display:block;height:13px;border-radius:3px;background:var(--sunk)}
+.wk i.hit{background:var(--brass)}
+.wk i.fut{opacity:.35}
 .set-row:first-child{border-top:none}
-.set-n{font-size:13px;color:var(--faint)}
 .field{position:relative}
 .field input{
   width:100%;padding:11px 36px 11px 11px;background:var(--sunk);border:1px solid transparent;
@@ -356,11 +383,59 @@ const PROGRAM = [
   ]}
 ];
 
+/* Substitute exercises — same job, different equipment or difficulty. */
+const EXTRA=[
+ {id:"step_up",name:"Step-up",sets:3,low:8,high:15,unit:"reps",perSide:true,load:"A sturdy chair or stair, dumbbells optional",
+  cue:"Whole foot on the step. Drive through the top heel without pushing off the bottom foot. Lower slowly.",prog:"Higher step, then dumbbells, then slower descent."},
+ {id:"wall_sit",name:"Wall Sit",sets:3,low:30,high:75,unit:"sec",load:"Bodyweight, back flat to a wall",
+  cue:"Thighs parallel to the floor, knees over ankles, weight in the heels. Breathe.",prog:"Add time, then hold a dumbbell on your lap, then go single-leg."},
+ {id:"floor_row",name:"Band Seated Row",sets:3,low:12,high:20,unit:"reps",load:"Band around your feet, sitting on the floor",
+  cue:"Sit tall, legs long. Pull the band to your waist, elbows brushing your ribs, squeeze for a second.",prog:"Shorten your grip on the band for more tension."},
+ {id:"incline_pushup",name:"Incline Push-up",sets:3,low:8,high:20,unit:"reps",load:"Hands on a counter, table, or stair",
+  cue:"Higher hands make it easier. Same rules: straight line head to heels, chest to the surface.",prog:"Work down to a lower surface, then the floor."},
+ {id:"db_thruster",name:"Dumbbell Thruster",sets:3,low:8,high:15,unit:"reps",load:"Two dumbbells at the shoulders",
+  cue:"Front squat down, then drive up and press overhead in one motion. Brutal and efficient.",prog:"Add reps. This one doubles as conditioning."},
+ {id:"glute_march",name:"Glute Bridge March",sets:2,low:10,high:20,unit:"reps",perSide:true,load:"Bodyweight, hips held up",
+  cue:"Hold the bridge at the top and lift one knee at a time without letting the hips dip or twist.",prog:"Slow the march down before adding reps."},
+ {id:"bird_dog",name:"Bird Dog",sets:2,low:8,high:12,unit:"reps",perSide:true,load:"Bodyweight, on hands and knees",
+  cue:"Extend opposite arm and leg until level with your back. Keep hips square — imagine balancing a glass on your low back.",prog:"Pause 3 seconds at full extension."},
+ {id:"suitcase_carry",name:"Suitcase Carry",sets:2,low:30,high:45,unit:"sec",perSide:true,load:"One heavy dumbbell, one hand",
+  cue:"Walk tall and refuse to lean toward the weight. Your obliques do the work.",prog:"Heavier, then longer."}
+];
+
 const DAY_INDEX = {}; PROGRAM.forEach((d,i)=>DAY_INDEX[d.key]=i);
-const EX_INDEX = {}; PROGRAM.forEach(d=>d.exercises.forEach(e=>EX_INDEX[e.id]=e));
+const EX_INDEX = {};
+PROGRAM.forEach(d=>d.exercises.forEach(e=>EX_INDEX[e.id]=e));
+EXTRA.forEach(e=>EX_INDEX[e.id]=e);
+
+/* Which muscles each movement pays into — drives the weekly volume check. */
+const MUSCLE={
+ goblet_squat:["Quads","Glutes"], db_rdl:["Hamstrings","Glutes"], reverse_lunge:["Quads","Glutes"],
+ glute_bridge:["Glutes"], dead_bug:["Core"], pushup:["Chest","Triceps"], one_arm_row:["Back","Biceps"],
+ db_ohp:["Shoulders","Triceps"], face_pull:["Back","Shoulders"], curl_ext:["Biceps","Triceps"],
+ kb_swing:["Hamstrings","Glutes"], split_squat:["Quads","Glutes"], sl_rdl:["Hamstrings","Glutes"],
+ calf_raise:["Calves"], side_plank:["Core"], pike_pushup:["Shoulders","Triceps"],
+ band_pulldown:["Back","Biceps"], floor_press:["Chest","Triceps"], rev_fly:["Back","Shoulders"],
+ carry:["Core","Shoulders"], step_up:["Quads","Glutes"], wall_sit:["Quads"], floor_row:["Back","Biceps"],
+ incline_pushup:["Chest","Triceps"], db_thruster:["Quads","Shoulders"], glute_march:["Glutes","Core"],
+ bird_dog:["Core"], suitcase_carry:["Core"]
+};
+
+/* Swap options offered inside each exercise. */
+const ALT={
+ goblet_squat:["split_squat","wall_sit","db_thruster"], db_rdl:["sl_rdl","kb_swing","glute_bridge"],
+ reverse_lunge:["step_up","split_squat"], glute_bridge:["glute_march","sl_rdl"], dead_bug:["bird_dog","side_plank"],
+ pushup:["incline_pushup","floor_press"], one_arm_row:["floor_row","band_pulldown"],
+ db_ohp:["pike_pushup","db_thruster"], face_pull:["rev_fly","floor_row"], curl_ext:["floor_row"],
+ kb_swing:["db_rdl","db_thruster"], split_squat:["step_up","reverse_lunge","wall_sit"],
+ sl_rdl:["db_rdl","glute_march"], calf_raise:[], side_plank:["bird_dog","dead_bug"],
+ pike_pushup:["db_ohp","incline_pushup"], band_pulldown:["floor_row","one_arm_row"],
+ floor_press:["pushup","incline_pushup"], rev_fly:["face_pull","floor_row"],
+ carry:["suitcase_carry","wall_sit"]
+};
 
 /* ---------- 2. STORAGE (local only) ---------- */
-const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="1.5";
+const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="1.6";
 let memoryOnly=false, storageNote="", readError=false;
 let S={schema:2,sessions:[],active:null,lastBackup:null,pending:null,
   settings:{rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}};
@@ -422,10 +497,25 @@ function completed(){ return S.sessions.filter(s=>s.done).sort((a,b)=> a.date<b.
 function lastFor(exId, skipId){
   for(const s of completed()){
     if(s.id===skipId) continue;
-    const sets=(s.entries||{})[exId];
-    if(sets && sets.some(x=>x.done && x.r)) return {date:s.date, sets:sets.filter(x=>x.done&&x.r)};
+    const sets=work((s.entries||{})[exId]);
+    if(sets.length) return {date:s.date, sets};
   }
   return null;
+}
+function work(sets){ return (sets||[]).filter(x=>x.done && !x.warm && x.r); }
+function score(x,ex){
+  const w=Number(x.w)||0, r=Number(x.r)||0;
+  if(ex && ex.unit==="sec") return r;
+  return w>0 ? Math.round(w*(1+r/30)) : r;    // Epley estimate, or plain reps for bodyweight
+}
+/* Best working set ever recorded for a lift, ignoring one session if asked. */
+function prFor(exId,skipId){
+  const ex=EX_INDEX[exId]; let best=0;
+  completed().forEach(s=>{
+    if(s.id===skipId) return;
+    work(s.entries[exId]).forEach(x=>{ const v=score(x,ex); if(v>best) best=v; });
+  });
+  return best;
 }
 function bestSet(sets){
   let best=null;
@@ -445,7 +535,7 @@ function volume(s){
   let v=0;
   Object.entries(s.entries||{}).forEach(([id,sets])=>{
     const ex=EX_INDEX[id];
-    sets.forEach(x=>{ if(x.done) v += (Number(x.w)||0)*(Number(x.r)||0)*(ex&&ex.perSide?2:1); });
+    sets.forEach(x=>{ if(x.done && !x.warm) v += (Number(x.w)||0)*(Number(x.r)||0)*(ex&&ex.perSide?2:1); });
   });
   return Math.round(v);
 }
@@ -548,6 +638,10 @@ document.getElementById("hdrback").onclick=()=>{
 };
 
 /* ---------- 5. TODAY VIEW ---------- */
+function planOf(a){
+  if(!a.plan) a.plan=PROGRAM[DAY_INDEX[a.dayId]].exercises.map(e=>e.id);
+  return a.plan;
+}
 function renderToday(){
   const el=document.getElementById("v-today");
   paintStreak();
@@ -555,33 +649,57 @@ function renderToday(){
   if(!a){ stopElapsed(); el.innerHTML=dayPicker(); bindPicker(el); document.getElementById("subline").textContent=sublineIdle(); return; }
   startElapsed(a);
   const day=PROGRAM[DAY_INDEX[a.dayId]];
-  document.getElementById("subline").textContent=day.title+" · "+day.focus;
+  const plan=planOf(a);
+  const doneCount=plan.filter(id=>(a.entries[id]||[]).some(x=>x.done)&&(a.entries[id]||[]).every(x=>x.done)).length;
+  document.getElementById("subline").textContent=`${day.title} · ${doneCount} of ${plan.length} exercises done`;
 
   let h=`<div class="prose" style="margin-bottom:14px"><p><span class="label">Warm-up</span><br>${esc(day.warmup)}</p></div>`;
-  day.exercises.forEach(ex=>{
+  plan.forEach(exId=>{
+    const ex=EX_INDEX[exId]; if(!ex) return;
     const prev=lastFor(ex.id,a.id);
+    const pr=prFor(ex.id,a.id);
     const sets=a.entries[ex.id]||[];
+    const allDone=sets.length&&sets.every(x=>x.done);
+    const collapsed=allDone && !a.open?.[ex.id];
     const target=ex.unit==="sec" ? `${ex.low}–${ex.high} s` : `${ex.low}–${ex.high} reps`;
+
+    if(collapsed){
+      h+=`<div class="card done-card" data-ex="${ex.id}">
+        <button class="card-head" data-act="reopen" style="width:100%;text-align:left">
+          <div style="flex:1">
+            <h3 class="ex-name" style="color:var(--muted)">✓ ${esc(ex.name)}</h3>
+            <div class="ex-meta">${work(sets).map(x=>setStr(x,ex)).join("&nbsp;· ")||"warm-up only"}</div>
+          </div>
+        </button></div>`;
+      return;
+    }
     h+=`<div class="card" data-ex="${ex.id}">
       <div class="card-head">
         <div style="flex:1">
           <h3 class="ex-name">${esc(ex.name)}</h3>
-          <div class="ex-meta">${ex.sets} sets · ${target}${ex.perSide?" · each side":""}</div>
+          <div class="ex-meta">${sets.length} sets · ${target}${ex.perSide?" · each side":""}</div>
           <div class="ghost-line">${prev
             ? `<b>Last (${daysAgo(prev.date)}):</b> ${prev.sets.map(x=>setStr(x,ex)).join("&nbsp;· ")}`
-            : "First time — find a weight that leaves 1–2 reps in the tank."}</div>
+            : "First time — pick a load that leaves 1–3 reps in the tank."}</div>
+          ${S.notes&&S.notes[ex.id]?`<div class="ghost-line" style="color:var(--brass)">✎ ${esc(S.notes[ex.id])}</div>`:""}
         </div>
       </div>
-      <div class="sets">${sets.map((st,i)=>setRow(ex,st,i,prev)).join("")}</div>
+      <div class="sets">${sets.map((st,i)=>setRow(ex,st,i,prev,pr)).join("")}</div>
       <div class="row-tools">
         <button data-act="add">+ set</button>
         <button data-act="del">− set</button>
-        <button data-act="how">How &amp; how to progress</button>
+        <button data-act="how">Form &amp; options</button>
       </div>
       <div class="note" style="display:none">
         <p><b>Setup.</b> ${esc(ex.load)}</p>
         <p><b>Form.</b> ${esc(ex.cue)}</p>
         <p><b>Progress.</b> ${esc(ex.prog)}</p>
+        ${pr?`<p><b>Your best.</b> <span class="num">${pr}</span> ${ex.unit==="sec"?"seconds":(prev&&prev.sets[0]&&prev.sets[0].w>0?"lb estimated max":"reps")}</p>`:""}
+        <p><span class="label">Your note</span></p>
+        <input class="tin" data-note="${ex.id}" value="${esc((S.notes&&S.notes[ex.id])||"")}" placeholder="e.g. use the blue band, chair is too low">
+        ${(ALT[ex.id]||[]).length?`<p style="margin-top:12px"><span class="label">Swap today for</span></p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">${(ALT[ex.id]||[]).map(aid=>
+            `<button class="tog" data-swap="${aid}" data-from="${ex.id}">${esc(EX_INDEX[aid].name)}</button>`).join("")}</div>`:""}
       </div>
     </div>`;
   });
@@ -594,14 +712,26 @@ function setStr(x,ex){
   const u=ex.unit==="sec"?"s":"";
   return Number(x.w)>0 ? `<span class="num">${x.w}×${x.r}${u}</span>` : `<span class="num">${x.r}${u||" reps"}</span>`;
 }
-function setRow(ex,st,i,prev){
+function setRow(ex,st,i,prev,pr){
   const p=prev&&prev.sets[i];
-  const wPH=p?p.w||"—":"—", rPH=p?p.r:(ex.low);
-  return `<div class="set-row ${st.done?"logged":""}" data-i="${i}">
-    <span class="set-n num">${i+1}</span>
-    <span class="field"><input inputmode="decimal" data-f="w" value="${st.w??""}" placeholder="${wPH}"><span class="unit">lb</span></span>
-    <span class="field"><input inputmode="numeric" data-f="r" value="${st.r??""}" placeholder="${rPH}"><span class="unit">${ex.unit==="sec"?"sec":"reps"}</span></span>
+  const wVal = st.w!=null ? st.w : (p?p.w:null);
+  const rVal = st.r!=null ? st.r : (p?p.r:ex.low);
+  const isPR = st.done && !st.warm && pr && score(st,ex)>pr;
+  const wStep = ex.unit==="sec" ? 5 : 5, rStep = ex.unit==="sec" ? 5 : 1;
+  return `<div class="set-row ${st.done?"logged":""} ${st.warm?"warm":""}" data-i="${i}">
+    <button class="set-n" data-act="warm" title="Mark as warm-up">${st.warm?"W":(i+1)}</button>
+    <span class="stp">
+      <button data-adj="w" data-by="${-wStep}">−</button>
+      <input inputmode="decimal" data-f="w" value="${wVal??""}" placeholder="—">
+      <button data-adj="w" data-by="${wStep}">+</button>
+    </span>
+    <span class="stp">
+      <button data-adj="r" data-by="${-rStep}">−</button>
+      <input inputmode="numeric" data-f="r" value="${rVal??""}" placeholder="${ex.low}">
+      <button data-adj="r" data-by="${rStep}">+</button>
+    </span>
     <button class="done" data-act="done">${st.done?"✓":"○"}</button>
+    ${isPR?'<span class="prbadge">PR</span>':""}
   </div>`;
 }
 function dayPicker(){
@@ -617,6 +747,7 @@ function dayPicker(){
         <button class="btn brass" style="margin:0" id="sendhealth">Send to Health</button>
         <button class="btn ghost" style="margin:0;width:auto;padding-left:18px;padding-right:18px" id="skiphealth">Skip</button>
       </div></div>`;
+  h+=consistency();
   h+=`<h2 class="sec">Pick today's session</h2><div class="day-list">`;
   PROGRAM.forEach(d=>{
     const last=c.find(s=>s.dayId===d.key);
@@ -642,6 +773,32 @@ function dayPicker(){
   }
   return h;
 }
+/* Eight weeks of consistency at a glance. */
+function consistency(){
+  const c=completed(); if(!c.length) return "";
+  const set=new Set(c.map(s=>s.date));
+  const today=new Date(todayISO()+"T12:00:00");
+  /* start on the Monday 7 weeks back, so the current week is the last column */
+  const start=new Date(today); start.setDate(start.getDate()-((today.getDay()+6)%7)-49);
+  let cells="";
+  for(let w=0;w<8;w++){
+    cells+='<div class="wk">';
+    for(let d=0;d<7;d++){
+      const dt=new Date(start); dt.setDate(start.getDate()+w*7+d);
+      const iso=new Date(dt-dt.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+      const future=dt>today;
+      cells+=`<i class="${set.has(iso)?"hit":""} ${future?"fut":""}"></i>`;
+    }
+    cells+='</div>';
+  }
+  const wk=c.filter(s=>(new Date(todayISO())-new Date(s.date))/864e5 < 7).length;
+  return `<div class="card" style="padding:14px var(--pad)">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+      <span class="label">Last 8 weeks</span>
+      <span style="font-size:13px;color:var(--muted)"><b style="color:var(--ink)">${wk}</b> of 4 this week</span>
+    </div>
+    <div class="grid">${cells}</div></div>`;
+}
 function sublineIdle(){
   const c=completed();
   if(!c.length) return "No sessions yet. Start with Day A.";
@@ -655,27 +812,48 @@ function bindPicker(el){
     const key=b.dataset.day;
     let s=S.sessions.find(x=>!x.done && x.dayId===key);
     if(!s){
-      s={id:uid(),date:todayISO(),ts:Date.now(),start:Date.now(),dayId:key,done:false,entries:{}};
-      PROGRAM[DAY_INDEX[key]].exercises.forEach(ex=>{
-        const prev=lastFor(ex.id);
-        s.entries[ex.id]=Array.from({length:ex.sets},(_,i)=>({
-          w: prev&&prev.sets[i] ? prev.sets[i].w : null, r:null, done:false }));
+      s={id:uid(),date:todayISO(),ts:Date.now(),start:Date.now(),dayId:key,done:false,entries:{},open:{},
+         plan:PROGRAM[DAY_INDEX[key]].exercises.map(e=>e.id)};
+      s.plan.forEach(id=>{
+        const ex=EX_INDEX[id], prev=lastFor(id);
+        s.entries[id]=Array.from({length:ex.sets},(_,i)=>({
+          w: prev&&prev.sets[i] ? prev.sets[i].w : null, r:null, done:false, warm:false }));
       });
       S.sessions.push(s);
     }
-    if(!s.start || (Date.now()-s.start)>6*36e5) s.start=Date.now();  // stale clock, restart it
+    if(!s.start || (Date.now()-s.start)>6*36e5) s.start=Date.now();
     S.active=s.id; save(); keepAwake(true); renderToday(); window.scrollTo(0,0);
   });
 }
 function bindSession(el,a,day){
+  if(!a.open) a.open={};
   el.querySelectorAll(".card").forEach(card=>{
     const ex=EX_INDEX[card.dataset.ex];
-    card.querySelectorAll("input").forEach(inp=>{
-      inp.oninput=()=>{
-        const i=+inp.closest(".set-row").dataset.i, f=inp.dataset.f;
-        const v=inp.value.trim();
-        a.entries[ex.id][i][f]= v===""?null:Number(v);
-        save();
+    const reopen=card.querySelector('[data-act="reopen"]');
+    if(reopen){ reopen.onclick=()=>{ a.open[ex.id]=true; save(); renderToday(); }; return; }
+
+    const setVal=(i,f,v)=>{
+      a.entries[ex.id][i][f]= (v===""||v==null) ? null : Math.max(0,Number(v));
+      save();
+    };
+    card.querySelectorAll("input[data-f]").forEach(inp=>{
+      inp.oninput=()=>setVal(+inp.closest(".set-row").dataset.i, inp.dataset.f, inp.value.trim());
+    });
+    /* the steppers — the whole point is never touching the keyboard */
+    card.querySelectorAll("[data-adj]").forEach(btn=>{
+      btn.onclick=()=>{
+        const row=btn.closest(".set-row"), i=+row.dataset.i, f=btn.dataset.adj;
+        const inp=row.querySelector(`input[data-f="${f}"]`);
+        const base=inp.value===""?(f==="r"?ex.low:0):Number(inp.value);
+        const next=Math.max(0, base+Number(btn.dataset.by));
+        inp.value=next; setVal(i,f,next);
+        primeAudio();
+      };
+    });
+    card.querySelectorAll('[data-act="warm"]').forEach(btn=>{
+      btn.onclick=()=>{
+        const row=btn.closest(".set-row"), i=+row.dataset.i, st=a.entries[ex.id][i];
+        st.warm=!st.warm; save(); renderToday();
       };
     });
     card.querySelectorAll('[data-act="done"]').forEach(btn=>{
@@ -683,24 +861,49 @@ function bindSession(el,a,day){
         const row=btn.closest(".set-row"), i=+row.dataset.i, st=a.entries[ex.id][i];
         if(!st.done){
           const rIn=row.querySelector('[data-f="r"]'), wIn=row.querySelector('[data-f="w"]');
-          if(st.r==null){ st.r=Number(rIn.placeholder)||0; rIn.value=st.r; }
-          if(st.w==null && wIn.placeholder!=="—"){ st.w=Number(wIn.placeholder)||0; wIn.value=st.w; }
-          st.done=true; row.classList.add("logged"); btn.textContent="✓";
-          startRest(S.settings.rest);
+          if(st.r==null) st.r=Number(rIn.value||rIn.placeholder)||0;
+          if(st.w==null && wIn.value!=="") st.w=Number(wIn.value)||0;
+          st.done=true;
+          const pr=prFor(ex.id,a.id);
+          const beat = !st.warm && pr && score(st,ex)>pr;
+          primeAudio();
+          if(!st.warm) startRest(S.settings.rest);
+          save();
+          const allDone=a.entries[ex.id].every(x=>x.done);
+          if(allDone) a.open[ex.id]=false;
+          renderToday();
+          if(beat) toast("New best on "+ex.name);
+          else if(allDone) toast(ex.name+" done");
         }else{
-          st.done=false; row.classList.remove("logged"); btn.textContent="○";
+          st.done=false; a.open[ex.id]=true; save(); renderToday();
         }
-        save();
       };
     });
     card.querySelector('[data-act="add"]').onclick=()=>{
-      a.entries[ex.id].push({w:null,r:null,done:false}); save(); renderToday();
+      a.entries[ex.id].push({w:null,r:null,done:false,warm:false}); save(); renderToday();
     };
     card.querySelector('[data-act="del"]').onclick=()=>{
       if(a.entries[ex.id].length>1){ a.entries[ex.id].pop(); save(); renderToday(); }
     };
     const note=card.querySelector(".note"), how=card.querySelector('[data-act="how"]');
-    how.onclick=()=>{ const open=note.style.display!=="none"; note.style.display=open?"none":"block"; how.textContent=open?"How & how to progress":"Hide"; };
+    how.onclick=()=>{ const open=note.style.display!=="none"; note.style.display=open?"none":"block"; how.textContent=open?"Form & options":"Hide"; };
+    const ni=card.querySelector("[data-note]");
+    if(ni) ni.onchange=()=>{
+      S.notes=S.notes||{};
+      const v=ni.value.trim();
+      if(v) S.notes[ex.id]=v; else delete S.notes[ex.id];
+      save(); toast("Note saved");
+    };
+    card.querySelectorAll("[data-swap]").forEach(b=>b.onclick=()=>{
+      const from=b.dataset.from, to=b.dataset.swap;
+      if(a.entries[from] && a.entries[from].some(x=>x.done)){ toast("Undo the logged sets first"); return; }
+      const idx=a.plan.indexOf(from); if(idx<0) return;
+      a.plan[idx]=to; delete a.entries[from];
+      const nex=EX_INDEX[to], prev=lastFor(to);
+      a.entries[to]=Array.from({length:nex.sets},(_,i)=>({
+        w: prev&&prev.sets[i]?prev.sets[i].w:null, r:null, done:false, warm:false }));
+      save(); renderToday(); toast("Swapped in "+nex.name);
+    });
   });
   el.querySelector("#finish").onclick=()=>{
     const any=Object.values(a.entries).some(sets=>sets.some(x=>x.done));
@@ -715,7 +918,7 @@ function bindSession(el,a,day){
     renderToday(); renderHistory();
   };
   el.querySelector("#scrap").onclick=()=>{
-    if(!confirm("Discard this session? Logged sets will be deleted.")) return;
+    if(!confirm("Delete this session? Logged sets will be lost.")) return;
     S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null; stopRest(); stopElapsed(); keepAwake(false); save(); renderToday();
   };
 }
@@ -725,7 +928,8 @@ function renderHistory(){
   const el=document.getElementById("v-history");
   const c=completed();
   const exIds=[...new Set(c.flatMap(s=>Object.keys(s.entries||{})))];
-  let h=`<h2 class="sec">Progress by exercise</h2>`;
+  let h=muscleVolume();
+  h+=`<h2 class="sec">Progress by exercise</h2>`;
   if(!exIds.length){
     h+=`<div class="prose"><p>Nothing logged yet. Finish a session and your history shows up here — every set, and a chart of how each lift is trending.</p></div>`;
   }else{
@@ -767,6 +971,29 @@ function renderHistory(){
   });
   const pick=el.querySelector("#expick");
   if(pick){ pick.onchange=()=>drawExercise(pick.value); drawExercise(pick.value); }
+}
+/* Weekly hard sets per muscle — the number the research actually cares about. */
+function muscleVolume(){
+  const since=new Date(); since.setDate(since.getDate()-7);
+  const iso=new Date(since-since.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+  const tally={};
+  completed().filter(s=>s.date>iso).forEach(s=>{
+    Object.entries(s.entries).forEach(([id,sets])=>{
+      const n=work(sets).length; if(!n) return;
+      (MUSCLE[id]||[]).forEach(m=>tally[m]=(tally[m]||0)+n);
+    });
+  });
+  const rows=Object.entries(tally).sort((a,b)=>b[1]-a[1]);
+  if(!rows.length) return "";
+  const max=Math.max(10,...rows.map(r=>r[1]));
+  return `<h2 class="sec">Hard sets this week</h2>
+  <div class="card" style="padding:14px var(--pad)">
+    ${rows.map(([m,n])=>`<div class="bar">
+      <span class="bn">${esc(m)}</span>
+      <span class="bt"><i style="width:${Math.round(n/max*100)}%;background:${n>=10?"var(--moss)":"var(--brass)"}"></i></span>
+      <span class="bv num">${n}</span></div>`).join("")}
+    <p style="font-size:12.5px;color:var(--muted);margin:10px 0 0">Ten or more hard sets per muscle per week is the range where growth reliably shows up. Warm-up sets aren't counted.</p>
+  </div>`;
 }
 function drawExercise(id){
   const box=document.getElementById("exbox"); if(!box) return;

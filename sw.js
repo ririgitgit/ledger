@@ -1,7 +1,7 @@
 /* Ledger service worker — makes the app work with no internet.
    Bump CACHE whenever you upload a new index.html. That is what tells
    every installed phone that a fresh copy is waiting. */
-const CACHE = "ledger-1.5";
+const CACHE = "ledger-1.6";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.png", "./icon-512.png"];
 
 self.addEventListener("install", e => {
