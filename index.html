@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledger — training log</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ledger">
+<meta name="theme-color" content="#1A1D21">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="icon" href="data:image/png;base64,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">
+<style>
+:root{
+  --ground:#E9ECEE;      /* cool concrete */
+  --surface:#FFFFFF;
+  --sunk:#DFE3E6;
+  --ink:#14181F;
+  --muted:#69737E;
+  --faint:#9AA4AE;
+  --rule:#CFD5DA;
+  --brass:#9A6B14;       /* plate brass */
+  --brass-soft:#F0E2C4;
+  --moss:#3F6B4A;
+  --alert:#8C3B2E;
+  --radius:14px;
+  --pad:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ground:#15181B;
+    --surface:#1E2226;
+    --sunk:#14171A;
+    --ink:#E8EAEC;
+    --muted:#98A2AC;
+    --faint:#6A747E;
+    --rule:#2E343A;
+    --brass:#D19A3E;
+    --brass-soft:#3A3018;
+    --moss:#6FA07C;
+    --alert:#D98A7A;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(76px + env(safe-area-inset-bottom));
+  overscroll-behavior-y:contain;
+}
+.display{font-family:"Avenir Next Condensed","Oswald","Arial Narrow",Impact,sans-serif}
+.num{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+.label{
+  font-family:"Avenir Next Condensed","Arial Narrow",sans-serif;
+  text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:600;color:var(--muted);
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,select{font:inherit;color:inherit}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:30;background:var(--ground);
+  padding:calc(env(safe-area-inset-top) + 14px) var(--pad) 10px;
+  border-bottom:1px solid var(--rule);
+}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.brand h1{
+  margin:0;font-size:26px;font-weight:700;letter-spacing:.02em;
+  font-family:"Avenir Next Condensed","Oswald","Arial Narrow",sans-serif;text-transform:uppercase;
+}
+.brand h1 span{color:var(--brass)}
+.subline{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ---------- layout ---------- */
+main{padding:var(--pad);max-width:640px;margin:0 auto}
+.view{display:none}
+.view.on{display:block}
+.card{
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);
+  margin-bottom:12px;overflow:hidden;
+}
+.card-head{padding:14px var(--pad) 10px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ex-name{font-size:19px;font-weight:600;line-height:1.2;margin:0}
+.ex-meta{font-size:13px;color:var(--muted);margin-top:3px}
+.ghost-line{font-size:13px;color:var(--faint);margin-top:6px}
+.ghost-line b{color:var(--muted);font-weight:600}
+
+/* ---------- set rows: the ledger ---------- */
+.sets{padding:2px var(--pad) 12px}
+.set-row{
+  display:grid;grid-template-columns:26px 1fr 1fr 46px;gap:8px;align-items:center;
+  padding:7px 0;border-top:1px solid var(--rule);position:relative;
+}
+.set-row:first-child{border-top:none}
+.set-n{font-size:13px;color:var(--faint)}
+.field{position:relative}
+.field input{
+  width:100%;padding:11px 36px 11px 11px;background:var(--sunk);border:1px solid transparent;
+  border-radius:9px;font-size:17px;text-align:left;
+  font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;
+  -moz-appearance:textfield;
+}
+.field input::-webkit-outer-spin-button,.field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.field input:focus{outline:none;border-color:var(--brass);background:var(--surface)}
+.field input::placeholder{color:var(--faint);opacity:1}
+.unit{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;pointer-events:none;
+}
+.done{
+  border:1px solid var(--rule);border-radius:9px;height:44px;display:flex;align-items:center;
+  justify-content:center;color:var(--faint);font-size:17px;min-height:44px;
+}
+.set-row.logged .done{background:var(--brass);border-color:var(--brass);color:#fff}
+@media (prefers-color-scheme: dark){.set-row.logged .done{color:#1A1D21}}
+.set-row.logged .field input{border-color:var(--brass-soft)}
+.pr-flag{color:var(--brass);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+.row-tools{display:flex;gap:14px;padding:2px var(--pad) 14px}
+.row-tools button{font-size:13px;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:2px}
+.note{padding:0 var(--pad) 14px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.note b{color:var(--ink);font-weight:600}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:block;width:100%;text-align:center;padding:15px;border-radius:12px;
+  background:var(--ink);color:var(--ground);font-weight:600;font-size:16px;margin:6px 0;
+}
+.btn.ghost{background:transparent;border:1px solid var(--rule);color:var(--ink);font-weight:500}
+.btn.brass{background:var(--brass);color:#fff}
+@media (prefers-color-scheme: dark){.btn.brass{color:#1A1D21}}
+.btn.danger{background:transparent;border:1px solid var(--alert);color:var(--alert)}
+
+/* ---------- day picker ---------- */
+.day-list{display:grid;gap:10px}
+.day{
+  display:flex;align-items:center;gap:14px;padding:14px var(--pad);
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);text-align:left;width:100%;
+}
+.day .key{
+  font-family:"Avenir Next Condensed","Arial Narrow",sans-serif;font-size:24px;font-weight:700;
+  width:34px;height:34px;flex:none;border-radius:8px;background:var(--sunk);color:var(--brass);
+  display:flex;align-items:center;justify-content:center;
+}
+.day .t{font-weight:600;font-size:17px}
+.day .s{font-size:13px;color:var(--muted);margin-top:2px}
+.day.next .key{background:var(--brass);color:#fff}
+@media (prefers-color-scheme: dark){.day.next .key{color:#1A1D21}}
+
+/* ---------- timer bar ---------- */
+#timerbar{
+  position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));z-index:40;
+  display:none;align-items:center;gap:12px;padding:10px var(--pad);
+  background:var(--ink);color:var(--ground);
+}
+#timerbar.on{display:flex}
+#timerbar .t{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-variant-numeric:tabular-nums}
+#timerbar button{margin-left:auto;font-size:14px;opacity:.8;text-decoration:underline}
+
+/* ---------- nav ---------- */
+nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;
+  background:var(--surface);border-top:1px solid var(--rule);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+nav button{flex:1;padding:11px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--faint)}
+nav button .ic{font-size:19px;line-height:1}
+nav button .lb{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+nav button.on{color:var(--brass)}
+
+/* ---------- history / plan ---------- */
+.sess{padding:13px var(--pad);border-bottom:1px solid var(--rule);width:100%;text-align:left;display:block}
+.sess:last-child{border-bottom:none}
+.sess .d{font-size:13px;color:var(--muted)}
+.sess .n{font-weight:600;margin-top:2px}
+.sess .v{font-size:13px;color:var(--faint);margin-top:2px}
+.detail{padding:0 var(--pad) 14px;font-size:14px;color:var(--muted);display:none}
+.detail.on{display:block}
+.detail div{padding:5px 0;border-top:1px solid var(--rule)}
+.detail b{color:var(--ink);font-weight:600}
+select{
+  width:100%;padding:13px 10px;border-radius:11px;border:1px solid var(--rule);
+  background:var(--surface);margin-bottom:12px;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+.spark{width:100%;height:72px;display:block}
+h2.sec{font-size:14px;margin:22px 0 8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  font-family:"Avenir Next Condensed","Arial Narrow",sans-serif;font-weight:600}
+h2.sec:first-child{margin-top:4px}
+.prose{background:var(--surface);border:1px solid var(--rule);border-radius:var(--radius);padding:var(--pad);margin-bottom:12px;font-size:14.5px;line-height:1.55}
+.prose p{margin:0 0 10px}
+.prose p:last-child{margin-bottom:0}
+.prose strong{font-weight:650}
+.prose ul{margin:0 0 10px;padding-left:18px}
+.prose li{margin-bottom:6px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:14px}
+.kv:first-child{border-top:none}
+.kv b{font-weight:600}
+#toast{
+  position:fixed;left:50%;transform:translate(-50%,20px);bottom:calc(84px + env(safe-area-inset-bottom));
+  background:var(--ink);color:var(--ground);padding:11px 18px;border-radius:999px;font-size:14px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:88vw;text-align:center;
+}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.warn{background:var(--brass-soft);border:1px solid var(--brass);color:var(--ink);padding:12px;border-radius:11px;font-size:13.5px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Led<span>ger</span></h1>
+    <div class="label" id="streak"></div>
+  </div>
+  <div class="subline" id="subline">Loading…</div>
+</header>
+
+<main>
+  <section id="v-today" class="view on"></section>
+  <section id="v-history" class="view"></section>
+  <section id="v-plan" class="view"></section>
+  <section id="v-data" class="view"></section>
+</main>
+
+<div id="timerbar">
+  <span class="label" style="color:inherit;opacity:.7">Rest</span>
+  <span class="t" id="tclock">1:30</span>
+  <button id="tstop">Stop</button>
+</div>
+
+<nav>
+  <button data-v="today" class="on"><span class="ic">▤</span><span class="lb">Today</span></button>
+  <button data-v="history"><span class="ic">◷</span><span class="lb">History</span></button>
+  <button data-v="plan"><span class="ic">◈</span><span class="lb">Plan</span></button>
+  <button data-v="data"><span class="ic">⚙</span><span class="lb">Data</span></button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   LEDGER — a local-only training log
+   All data lives in this browser's storage on your phone.
+   Nothing is sent anywhere. No account, no server, no network.
+   ============================================================ */
+
+/* ---------- 1. THE PROGRAM ---------- */
+const PROGRAM = [
+{ key:"A", title:"Lower — Squat", focus:"Quads, glutes, trunk", mins:"22–28 min",
+  warmup:"2 min: 20 bodyweight squats, 10 hip hinges, 10 leg swings per side, 20 s deep squat hold.",
+  exercises:[
+    {id:"goblet_squat", name:"Goblet Squat", sets:3, low:8, high:15, unit:"reps", load:"Dumbbell or kettlebell held at chest",
+     cue:"Hold the weight at your sternum, elbows tucked. Sit straight down between your hips, knees tracking over toes. Go as deep as you can keep a flat back. 2 s down, drive up.",
+     prog:"When you hit 15 good reps on all 3 sets, add weight. Out of weight? Add a 3-second pause at the bottom, then move toward 20–25 reps."},
+    {id:"db_rdl", name:"Romanian Deadlift", sets:3, low:10, high:15, unit:"reps", load:"Two dumbbells (log the pair weight, e.g. 50 for 2×25)",
+     cue:"Soft knees, weights close to your legs. Push hips back until you feel a strong stretch in the hamstrings, spine neutral. Squeeze glutes to stand.",
+     prog:"At 15 reps × 3, slow the lowering to 4 seconds, then progress to a single-leg version on Day C."},
+    {id:"reverse_lunge", name:"Reverse Lunge", sets:2, low:8, high:12, unit:"reps", perSide:true, load:"Bodyweight, then dumbbells at sides",
+     cue:"Step back, drop the back knee toward the floor, keep weight in the front heel. Stand by driving through the front leg.",
+     prog:"Bodyweight → dumbbells → deficit (front foot on a book) → slow 3 s descent."},
+    {id:"glute_bridge", name:"Glute Bridge", sets:2, low:12, high:20, unit:"reps", load:"Band above knees, or dumbbell on hips",
+     cue:"Heels close to your butt. Drive through heels, squeeze glutes hard at the top for 1 s, ribs down — don't arch the low back.",
+     prog:"Add reps, then a band, then a dumbbell, then single-leg."},
+    {id:"dead_bug", name:"Dead Bug", sets:2, low:8, high:12, unit:"reps", perSide:true, load:"Bodyweight",
+     cue:"On your back, low back pressed flat into the floor. Lower opposite arm and leg slowly, breathe out. If your back lifts, shorten the range.",
+     prog:"Slow it down before you add reps. 4 s per rep is the goal."}
+  ]},
+
+{ key:"B", title:"Upper — Press & Row", focus:"Chest, back, shoulders, arms", mins:"22–28 min",
+  warmup:"2 min: 20 arm circles each way, 15 band pull-aparts, 10 slow push-ups against a wall.",
+  exercises:[
+    {id:"pushup", name:"Push-up", sets:3, low:6, high:15, unit:"reps", load:"Bodyweight (log 0). Too hard? Hands on a counter. Too easy? Feet elevated.",
+     cue:"Hands slightly wider than shoulders, body in one line from head to heels. Lower until your chest is a fist off the floor, elbows about 45° from your ribs.",
+     prog:"Hands high → hands low → floor → feet elevated → slow 3 s lowering → hold a dumbbell-free pause at the bottom."},
+    {id:"one_arm_row", name:"One-Arm Dumbbell Row", sets:3, low:10, high:15, unit:"reps", perSide:true, load:"One dumbbell",
+     cue:"Hand and knee on a chair, back flat and parallel to the floor. Pull the dumbbell to your hip, lead with the elbow, squeeze for 1 s, lower under control.",
+     prog:"At 15 reps × 3 with 25 lb, add a 2 s squeeze at the top, then slow the lowering to 4 s, then move toward 20–25 reps."},
+    {id:"db_ohp", name:"Overhead Press", sets:3, low:8, high:12, unit:"reps", load:"Two dumbbells (log pair weight)",
+     cue:"Stand tall, squeeze glutes, ribs down. Press from shoulder height to fully locked overhead, biceps by your ears. Lower slowly.",
+     prog:"Reps → weight → half-kneeling (removes leg drive) → single-arm."},
+    {id:"face_pull", name:"Band Face Pull", sets:2, low:15, high:20, unit:"reps", load:"Resistance band anchored at chest height",
+     cue:"Pull the band toward your eyes, hands ending wide beside your ears, elbows high. Squeeze the shoulder blades. This is posture insurance — never rush it.",
+     prog:"Shorten your grip on the band or step back for more tension."},
+    {id:"curl_ext", name:"Curl → Triceps Extension", sets:2, low:10, high:15, unit:"reps", load:"Dumbbells — superset, no rest between the two",
+     cue:"Curl: elbows pinned to your sides, no swinging. Then overhead extension: elbows narrow and pointed up, lower the weight behind your head, stretch, press up. Log the curl weight.",
+     prog:"These are the last thing in the session on purpose. Add reps, then weight."}
+  ]},
+
+{ key:"C", title:"Lower — Hinge", focus:"Hamstrings, glutes, single leg, power", mins:"22–28 min",
+  warmup:"2 min: 20 bodyweight good mornings, 10 hip hinges with a band, 20 s couch stretch per side.",
+  exercises:[
+    {id:"kb_swing", name:"Kettlebell Swing", sets:3, low:12, high:20, unit:"reps", load:"Kettlebell (or one dumbbell held by the head)",
+     cue:"Hike the bell back between your legs like a football snap, then SNAP your hips forward. Arms are ropes. The bell floats to chest height — you don't lift it. Sharp exhale at the top.",
+     prog:"This is your conditioning. Add reps, then speed, then sets. Stop the set the moment the hip snap gets lazy."},
+    {id:"split_squat", name:"Bulgarian Split Squat", sets:3, low:8, high:12, unit:"reps", perSide:true, load:"Bodyweight, then dumbbells. Rear foot on a couch or chair.",
+     cue:"Rear foot elevated behind you, front foot far enough forward that your front shin stays near vertical. Drop straight down. Slight forward lean loads the glute.",
+     prog:"The single best leg exercise you can do with light dumbbells. Bodyweight → dumbbells → 3 s lowering → 2 s pause at the bottom."},
+    {id:"sl_rdl", name:"Single-Leg RDL", sets:2, low:8, high:12, unit:"reps", perSide:true, load:"One dumbbell in the opposite hand",
+     cue:"Stand on one leg, hinge forward, back leg rising behind you like a seesaw. Keep hips square to the floor. Touch the weight toward your shin, then stand.",
+     prog:"Balance improves fast. Once steady, add weight; then slow to 4 s down."},
+    {id:"calf_raise", name:"Calf Raise", sets:2, low:12, high:20, unit:"reps", load:"Bodyweight or a dumbbell in one hand, toes on a stair edge",
+     cue:"Full stretch at the bottom, 1 s squeeze at the top. Don't bounce.",
+     prog:"Two legs → single leg → single leg holding a dumbbell."},
+    {id:"side_plank", name:"Side Plank", sets:2, low:20, high:45, unit:"sec", perSide:true, load:"Bodyweight",
+     cue:"Elbow under shoulder, body in one line, hips stacked and lifted. Breathe normally. Drop your knee for an easier version.",
+     prog:"When 45 s is easy on both sides, lift the top leg or add a dumbbell on the hip."}
+  ]},
+
+{ key:"D", title:"Upper — Vertical & Carry", focus:"Lats, shoulders, chest, grip", mins:"22–28 min",
+  warmup:"2 min: 15 band pull-aparts, 10 scapular shrugs, 10 slow pike push-ups against a wall.",
+  exercises:[
+    {id:"pike_pushup", name:"Pike Push-up", sets:3, low:5, high:12, unit:"reps", load:"Bodyweight (log 0). Feet on a chair to make it harder.",
+     cue:"Hips high in an upside-down V. Lower the crown of your head toward the floor between your hands, elbows out at ~45°. Press back up.",
+     prog:"Hands elevated (easy) → floor → feet elevated → slow 3 s lowering."},
+    {id:"band_pulldown", name:"Band Lat Pulldown", sets:3, low:10, high:15, unit:"reps", load:"Band anchored high (door anchor or over a doorframe)",
+     cue:"Kneel far enough away for real tension. Start with arms long overhead, pull elbows down and into your ribs, chest proud. Squeeze the lats for 1 s.",
+     prog:"Step further from the anchor, double the band, or switch to a heavier band. Log the band color as the weight (see Data tab tip)."},
+    {id:"floor_press", name:"Dumbbell Floor Press", sets:3, low:10, high:15, unit:"reps", load:"Two dumbbells (log pair weight)",
+     cue:"Lie on the floor, knees bent. Lower until your triceps touch the floor, pause for 1 s, then press. The floor makes the pause honest.",
+     prog:"Reps → weight → 2 s pause → single-arm (huge core demand)."},
+    {id:"rev_fly", name:"Bent-Over Reverse Fly", sets:2, low:12, high:20, unit:"reps", load:"Light dumbbells or a band",
+     cue:"Hinge forward to about 45°, soft elbows. Raise the weights out to the sides like wings, led by the pinkies. Small weight, big squeeze.",
+     prog:"Never go heavy here. Add reps and a 2 s hold at the top."},
+    {id:"carry", name:"Farmer Carry", sets:2, low:30, high:45, unit:"sec", load:"Heaviest dumbbells you have, one in each hand",
+     cue:"Walk. Tall posture, shoulders down and back, ribs stacked over hips, quiet steps. Grip will fail first — that's the point.",
+     prog:"When 45 s is easy, go single-arm (suitcase carry) and fight the sideways lean."}
+  ]}
+];
+
+const DAY_INDEX = {}; PROGRAM.forEach((d,i)=>DAY_INDEX[d.key]=i);
+const EX_INDEX = {}; PROGRAM.forEach(d=>d.exercises.forEach(e=>EX_INDEX[e.id]=e));
+
+/* ---------- 2. STORAGE (local only) ---------- */
+const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="1.2";
+let memoryOnly=false, storageNote="", readError=false;
+let S={schema:1,sessions:[],active:null,settings:{rest:90},lastBackup:null};
+
+/* Every future version of this app runs its saved data through migrate()
+   before touching it. Unknown fields are kept, never dropped. */
+function migrate(d){
+  d.schema = d.schema || 1;
+  if(!Array.isArray(d.sessions)) d.sessions=[];
+  d.settings = Object.assign({rest:90}, d.settings||{});
+  if(d.active && !d.sessions.some(x=>x.id===d.active)) d.active=null;
+  // Future versions add steps here, e.g. if(d.schema<2){ ...; d.schema=2; }
+  return d;
+}
+function load(){
+  try{ localStorage.setItem("ledger.probe","1"); localStorage.removeItem("ledger.probe"); }
+  catch(e){
+    memoryOnly=true;
+    storageNote = location.protocol==="file:"
+      ? "You opened this file directly from Files or iCloud. Browsers refuse to save data for file:// pages — it must be served from a real web address."
+      : "This browser is blocking storage. That means a preview sandbox, Private Browsing, or a site-data setting.";
+    return;
+  }
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw) S=migrate(Object.assign(S,JSON.parse(raw)));
+  }catch(e){
+    readError=true;
+    storageNote="Your saved file couldn't be read. Check for an automatic snapshot below before logging anything new.";
+  }
+  if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
+}
+function save(){
+  if(memoryOnly) return;
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
+  catch(e){ memoryOnly=true; toast("Storage is full or blocked — export your data now"); }
+}
+function snapshot(){
+  if(memoryOnly) return;
+  try{ localStorage.setItem(SNAP,JSON.stringify({at:Date.now(),data:S})); }catch(e){}
+}
+function readSnapshot(){
+  try{ const r=localStorage.getItem(SNAP); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function todayISO(){ const d=new Date(); return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
+function fmtDate(iso){
+  const d=new Date(iso+"T12:00:00");
+  return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+}
+function daysAgo(iso){
+  const ms=new Date(todayISO()+"T12:00:00")-new Date(iso+"T12:00:00");
+  const n=Math.round(ms/864e5);
+  return n===0?"today":n===1?"yesterday":n+" days ago";
+}
+
+/* ---------- 3. HELPERS ---------- */
+function completed(){ return S.sessions.filter(s=>s.done).sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:(a.ts<b.ts?1:-1)); }
+function lastFor(exId, skipId){
+  for(const s of completed()){
+    if(s.id===skipId) continue;
+    const sets=(s.entries||{})[exId];
+    if(sets && sets.some(x=>x.done && x.r)) return {date:s.date, sets:sets.filter(x=>x.done&&x.r)};
+  }
+  return null;
+}
+function bestSet(sets){
+  let best=null;
+  sets.forEach(x=>{
+    const score=(Number(x.w)||0)*(Number(x.r)||0) + (Number(x.r)||0);
+    if(!best || score>best.score) best={w:Number(x.w)||0,r:Number(x.r)||0,score};
+  });
+  return best;
+}
+function nextDayKey(){
+  const c=completed();
+  if(!c.length) return "A";
+  const i=DAY_INDEX[c[0].dayId];
+  return PROGRAM[(i+1)%PROGRAM.length].key;
+}
+function volume(s){
+  let v=0;
+  Object.entries(s.entries||{}).forEach(([id,sets])=>{
+    const ex=EX_INDEX[id];
+    sets.forEach(x=>{ if(x.done) v += (Number(x.w)||0)*(Number(x.r)||0)*(ex&&ex.perSide?2:1); });
+  });
+  return Math.round(v);
+}
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2200);
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------- 4. REST TIMER ---------- */
+let timer=null,tleft=0;
+function startRest(sec){
+  tleft=sec; document.getElementById("timerbar").classList.add("on"); paintTimer();
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    tleft--; paintTimer();
+    if(tleft<=0){ stopRest(); if(navigator.vibrate) navigator.vibrate([120,60,120]); toast("Rest done — next set"); }
+  },1000);
+}
+function paintTimer(){
+  const m=Math.floor(Math.max(tleft,0)/60), s=Math.max(tleft,0)%60;
+  document.getElementById("tclock").textContent=m+":"+String(s).padStart(2,"0");
+}
+function stopRest(){ clearInterval(timer); document.getElementById("timerbar").classList.remove("on"); }
+document.getElementById("tstop").onclick=stopRest;
+
+/* ---------- 5. TODAY VIEW ---------- */
+function renderToday(){
+  const el=document.getElementById("v-today");
+  paintStreak();
+  const a=S.active ? S.sessions.find(s=>s.id===S.active) : null;
+  if(!a){ el.innerHTML=dayPicker(); bindPicker(el); document.getElementById("subline").textContent=sublineIdle(); return; }
+  const day=PROGRAM[DAY_INDEX[a.dayId]];
+  document.getElementById("subline").textContent=day.title+" · "+day.focus;
+
+  let h=`<div class="prose" style="margin-bottom:14px"><p><span class="label">Warm-up</span><br>${esc(day.warmup)}</p></div>`;
+  day.exercises.forEach(ex=>{
+    const prev=lastFor(ex.id,a.id);
+    const sets=a.entries[ex.id]||[];
+    const target=ex.unit==="sec" ? `${ex.low}–${ex.high} s` : `${ex.low}–${ex.high} reps`;
+    h+=`<div class="card" data-ex="${ex.id}">
+      <div class="card-head">
+        <div style="flex:1">
+          <h3 class="ex-name">${esc(ex.name)}</h3>
+          <div class="ex-meta">${ex.sets} sets · ${target}${ex.perSide?" · each side":""}</div>
+          <div class="ghost-line">${prev
+            ? `<b>Last (${daysAgo(prev.date)}):</b> ${prev.sets.map(x=>setStr(x,ex)).join("&nbsp;· ")}`
+            : "First time — find a weight that leaves 1–2 reps in the tank."}</div>
+        </div>
+      </div>
+      <div class="sets">${sets.map((st,i)=>setRow(ex,st,i,prev)).join("")}</div>
+      <div class="row-tools">
+        <button data-act="add">+ set</button>
+        <button data-act="del">− set</button>
+        <button data-act="how">How &amp; how to progress</button>
+      </div>
+      <div class="note" style="display:none">
+        <p><b>Setup.</b> ${esc(ex.load)}</p>
+        <p><b>Form.</b> ${esc(ex.cue)}</p>
+        <p><b>Progress.</b> ${esc(ex.prog)}</p>
+      </div>
+    </div>`;
+  });
+  h+=`<button class="btn brass" id="finish">Finish workout</button>
+      <button class="btn ghost" id="scrap">Discard this session</button>`;
+  el.innerHTML=h;
+  bindSession(el,a,day);
+}
+function setStr(x,ex){
+  const u=ex.unit==="sec"?"s":"";
+  return Number(x.w)>0 ? `<span class="num">${x.w}×${x.r}${u}</span>` : `<span class="num">${x.r}${u||" reps"}</span>`;
+}
+function setRow(ex,st,i,prev){
+  const p=prev&&prev.sets[i];
+  const wPH=p?p.w||"—":"—", rPH=p?p.r:(ex.low);
+  return `<div class="set-row ${st.done?"logged":""}" data-i="${i}">
+    <span class="set-n num">${i+1}</span>
+    <span class="field"><input inputmode="decimal" data-f="w" value="${st.w??""}" placeholder="${wPH}"><span class="unit">lb</span></span>
+    <span class="field"><input inputmode="numeric" data-f="r" value="${st.r??""}" placeholder="${rPH}"><span class="unit">${ex.unit==="sec"?"sec":"reps"}</span></span>
+    <button class="done" data-act="done">${st.done?"✓":"○"}</button>
+  </div>`;
+}
+function dayPicker(){
+  const nk=nextDayKey();
+  const c=completed();
+  let h=`<h2 class="sec">Pick today's session</h2><div class="day-list">`;
+  PROGRAM.forEach(d=>{
+    const last=c.find(s=>s.dayId===d.key);
+    h+=`<button class="day ${d.key===nk?"next":""}" data-day="${d.key}">
+      <span class="key">${d.key}</span>
+      <span style="flex:1">
+        <span class="t">${esc(d.title)}</span>
+        <span class="s">${esc(d.focus)} · ${d.mins}${last?` · last ${daysAgo(last.date)}`:""}</span>
+      </span>
+      ${d.key===nk?'<span class="pr-flag">Next</span>':""}
+    </button>`;
+  });
+  h+=`</div>`;
+  if(memoryOnly){
+    h=`<div class="warn"><b>Nothing is being saved right now.</b> ${esc(storageNote)} Once the app is opened from its own web address and added to your Home Screen, it saves normally.</div>`+h;
+  }else{
+    const since=S.lastBackup ? c.filter(s=>s.date>S.lastBackup).length : c.length;
+    if(since>=8) h=`<div class="warn"><b>${since} sessions since your last backup.</b> Take 10 seconds in the Data tab — you're the only copy.</div>`+h;
+  }
+  return h;
+}
+function sublineIdle(){
+  const c=completed();
+  if(!c.length) return "No sessions yet. Start with Day A.";
+  return `Last session ${daysAgo(c[0].date)} · ${c.length} logged`;
+}
+function bindPicker(el){
+  el.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{
+    const key=b.dataset.day;
+    let s=S.sessions.find(x=>!x.done && x.dayId===key);
+    if(!s){
+      s={id:uid(),date:todayISO(),ts:Date.now(),dayId:key,done:false,entries:{}};
+      PROGRAM[DAY_INDEX[key]].exercises.forEach(ex=>{
+        const prev=lastFor(ex.id);
+        s.entries[ex.id]=Array.from({length:ex.sets},(_,i)=>({
+          w: prev&&prev.sets[i] ? prev.sets[i].w : null, r:null, done:false }));
+      });
+      S.sessions.push(s);
+    }
+    S.active=s.id; save(); renderToday(); window.scrollTo(0,0);
+  });
+}
+function bindSession(el,a,day){
+  el.querySelectorAll(".card").forEach(card=>{
+    const ex=EX_INDEX[card.dataset.ex];
+    card.querySelectorAll("input").forEach(inp=>{
+      inp.oninput=()=>{
+        const i=+inp.closest(".set-row").dataset.i, f=inp.dataset.f;
+        const v=inp.value.trim();
+        a.entries[ex.id][i][f]= v===""?null:Number(v);
+        save();
+      };
+    });
+    card.querySelectorAll('[data-act="done"]').forEach(btn=>{
+      btn.onclick=()=>{
+        const row=btn.closest(".set-row"), i=+row.dataset.i, st=a.entries[ex.id][i];
+        if(!st.done){
+          const rIn=row.querySelector('[data-f="r"]'), wIn=row.querySelector('[data-f="w"]');
+          if(st.r==null){ st.r=Number(rIn.placeholder)||0; rIn.value=st.r; }
+          if(st.w==null && wIn.placeholder!=="—"){ st.w=Number(wIn.placeholder)||0; wIn.value=st.w; }
+          st.done=true; row.classList.add("logged"); btn.textContent="✓";
+          startRest(S.settings.rest);
+        }else{
+          st.done=false; row.classList.remove("logged"); btn.textContent="○";
+        }
+        save();
+      };
+    });
+    card.querySelector('[data-act="add"]').onclick=()=>{
+      a.entries[ex.id].push({w:null,r:null,done:false}); save(); renderToday();
+    };
+    card.querySelector('[data-act="del"]').onclick=()=>{
+      if(a.entries[ex.id].length>1){ a.entries[ex.id].pop(); save(); renderToday(); }
+    };
+    const note=card.querySelector(".note"), how=card.querySelector('[data-act="how"]');
+    how.onclick=()=>{ const open=note.style.display!=="none"; note.style.display=open?"none":"block"; how.textContent=open?"How & how to progress":"Hide"; };
+  });
+  el.querySelector("#finish").onclick=()=>{
+    const any=Object.values(a.entries).some(sets=>sets.some(x=>x.done));
+    if(!any){ toast("Log at least one set first"); return; }
+    Object.keys(a.entries).forEach(id=>{ a.entries[id]=a.entries[id].filter(x=>x.done); if(!a.entries[id].length) delete a.entries[id]; });
+    a.done=true; a.date=todayISO(); S.active=null; stopRest(); save(); snapshot();
+    toast("Session saved · "+volume(a).toLocaleString()+" lb total volume");
+    renderToday(); renderHistory();
+  };
+  el.querySelector("#scrap").onclick=()=>{
+    if(!confirm("Discard this session? Logged sets will be deleted.")) return;
+    S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null; stopRest(); save(); renderToday();
+  };
+}
+
+/* ---------- 6. HISTORY VIEW ---------- */
+function renderHistory(){
+  const el=document.getElementById("v-history");
+  const c=completed();
+  const exIds=[...new Set(c.flatMap(s=>Object.keys(s.entries||{})))];
+  let h=`<h2 class="sec">Progress by exercise</h2>`;
+  if(!exIds.length){
+    h+=`<div class="prose"><p>Nothing logged yet. Finish a session and your history shows up here — every set, and a chart of how each lift is trending.</p></div>`;
+  }else{
+    h+=`<select id="expick">${exIds.map(id=>`<option value="${id}">${esc(EX_INDEX[id]?EX_INDEX[id].name:id)}</option>`).join("")}</select>
+        <div class="card" id="exbox"></div>`;
+  }
+  h+=`<h2 class="sec">Session log</h2><div class="card">`;
+  if(!c.length) h+=`<div class="sess"><div class="n">No sessions yet</div><div class="v">Your last 200 workouts will live here.</div></div>`;
+  c.slice(0,200).forEach(s=>{
+    const d=PROGRAM[DAY_INDEX[s.dayId]];
+    const nSets=Object.values(s.entries).reduce((n,x)=>n+x.length,0);
+    h+=`<button class="sess" data-s="${s.id}">
+        <div class="d">${fmtDate(s.date)}</div>
+        <div class="n">Day ${s.dayId} — ${esc(d?d.title:"")}</div>
+        <div class="v">${nSets} sets · ${volume(s).toLocaleString()} lb volume</div>
+      </button>
+      <div class="detail" data-d="${s.id}">
+        ${Object.entries(s.entries).map(([id,sets])=>{
+          const ex=EX_INDEX[id]||{name:id,unit:"reps"};
+          return `<div><b>${esc(ex.name)}</b> — ${sets.map(x=>setStr(x,ex)).join("&nbsp;· ")}</div>`;
+        }).join("")}
+        <div><button data-del="${s.id}" style="color:var(--alert);font-size:13px">Delete this session</button></div>
+      </div>`;
+  });
+  h+=`</div>`;
+  el.innerHTML=h;
+
+  el.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
+    el.querySelector(`[data-d="${b.dataset.s}"]`).classList.toggle("on");
+  });
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(!confirm("Delete this session permanently?")) return;
+    S.sessions=S.sessions.filter(s=>s.id!==b.dataset.del); save(); renderHistory(); renderToday();
+  });
+  const pick=el.querySelector("#expick");
+  if(pick){ pick.onchange=()=>drawExercise(pick.value); drawExercise(pick.value); }
+}
+function drawExercise(id){
+  const box=document.getElementById("exbox"); if(!box) return;
+  const ex=EX_INDEX[id]||{name:id,unit:"reps",perSide:false};
+  const rows=completed().filter(s=>s.entries[id]).reverse()
+    .map(s=>({date:s.date, best:bestSet(s.entries[id]), sets:s.entries[id]}));
+  const pts=rows.map(r=> r.best.w>0 ? Math.round(r.best.w*(1+r.best.r/30)) : r.best.r);
+  const unit = rows.length && rows[rows.length-1].best.w>0 ? "est. 1-rep max (lb)" : (ex.unit==="sec"?"best hold (sec)":"best set (reps)");
+  let h=`<div class="card-head"><div style="flex:1">
+      <h3 class="ex-name">${esc(ex.name)}</h3>
+      <div class="ex-meta">${rows.length} session${rows.length===1?"":"s"} · trend of ${unit}</div>
+    </div></div>`;
+  h+=`<div style="padding:0 16px 8px">${spark(pts)}</div>`;
+  h+=`<div class="detail on" style="padding-bottom:14px">`+
+     rows.slice(-8).reverse().map(r=>`<div><b>${fmtDate(r.date)}</b> — ${r.sets.map(x=>setStr(x,ex)).join("&nbsp;· ")}</div>`).join("")+`</div>`;
+  box.innerHTML=h;
+}
+function spark(v){
+  if(v.length<2) return `<div style="height:72px;display:flex;align-items:center;color:var(--faint);font-size:13px">Two sessions needed to draw a trend.</div>`;
+  const W=300,H=72,p=6,mn=Math.min(...v),mx=Math.max(...v),rg=(mx-mn)||1;
+  const X=i=>p+i*(W-2*p)/(v.length-1), Y=n=>H-p-((n-mn)/rg)*(H-2*p);
+  const line=v.map((n,i)=>`${i?"L":"M"}${X(i).toFixed(1)},${Y(n).toFixed(1)}`).join(" ");
+  const area=`${line} L${X(v.length-1).toFixed(1)},${H} L${X(0).toFixed(1)},${H} Z`;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="progress trend">
+    <path d="${area}" fill="var(--brass)" opacity=".13"/>
+    <path d="${line}" fill="none" stroke="var(--brass)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${v.map((n,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(n).toFixed(1)}" r="2.6" fill="var(--brass)"/>`).join("")}
+  </svg>
+  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--faint)" class="num">
+    <span>${mn}</span><span>now ${v[v.length-1]}</span><span>${mx}</span></div>`;
+}
+
+/* ---------- 7. PLAN VIEW ---------- */
+function renderPlan(){
+  document.getElementById("v-plan").innerHTML=`
+  <h2 class="sec">The week</h2>
+  <div class="prose">
+    <p>Four sessions, rotating <b>A → B → C → D</b>. Each muscle gets trained twice a week, which is the schedule that consistently outperforms once-a-week training in the research.</p>
+    <div class="kv"><span>Mon</span><b>A — Lower, squat</b></div>
+    <div class="kv"><span>Tue</span><b>B — Upper, press &amp; row</b></div>
+    <div class="kv"><span>Wed</span><span style="color:var(--muted)">Walk, stretch, rest</span></div>
+    <div class="kv"><span>Thu</span><b>C — Lower, hinge</b></div>
+    <div class="kv"><span>Fri</span><b>D — Upper, vertical &amp; carry</b></div>
+    <div class="kv"><span>Sat / Sun</span><span style="color:var(--muted)">Rest, or an easy walk</span></div>
+    <p style="margin-top:10px">Miss a day? Don't skip it — just do the next letter whenever you're next in the gym. The app always points at the next one for you.</p>
+  </div>
+
+  <h2 class="sec">How hard to push</h2>
+  <div class="prose">
+    <p>Every working set should end with <b>1–3 reps left in the tank</b>. That means: you could have done 1–3 more with good form, but not 6. Below that effort, light weights don't do much; going to total failure every set mostly just costs you recovery.</p>
+    <p>With dumbbells capped at 25 lb, <b>higher reps do the job</b>. Sets of 8 and sets of 25 build similar muscle as long as both are taken close to failure. So when a weight gets easy, you chase reps, then tempo, then a harder variation — in that order.</p>
+  </div>
+
+  <h2 class="sec">The progression rule</h2>
+  <div class="prose">
+    <p>One rule, applied every session — this is what actually drives results:</p>
+    <ul>
+      <li><b>Beat the ghost.</b> The app shows what you did last time. Add at least one rep to one set.</li>
+      <li><b>Hit the top of the rep range on every set?</b> Add weight next time and drop back to the bottom of the range.</li>
+      <li><b>Out of weight?</b> In order: slow the lowering to 3–4 seconds → add a 2-second pause at the hardest point → go single-limb → then keep adding reps up to about 25–30.</li>
+    </ul>
+    <p>Every 6–8 weeks, take a lighter week: same workouts, two sets instead of three, stop well short of failure. You'll come back stronger.</p>
+  </div>
+
+  <h2 class="sec">The things that matter more than the program</h2>
+  <div class="prose">
+    <ul>
+      <li><b>Protein.</b> Roughly 0.7 g per pound of bodyweight per day. This is the single biggest lever on whether the training turns into muscle.</li>
+      <li><b>Sleep.</b> 7–9 hours. Under-sleeping blunts strength and recovery measurably.</li>
+      <li><b>Steps.</b> Aim for 7,000+ a day. Your four 25-minute sessions are the strength stimulus; walking is the health one.</li>
+      <li><b>Soreness isn't the scoreboard.</b> The numbers in this app are.</li>
+    </ul>
+    <p style="color:var(--muted);font-size:13px">General fitness information, not medical advice. If you have a health condition or an injury, check with a doctor or a physio before starting.</p>
+  </div>
+
+  <h2 class="sec">Install it</h2>
+  <div class="prose">
+    <p>In Safari on your iPhone: tap <b>Share</b> (the square with the arrow) → <b>Add to Home Screen</b> → <b>Add</b>. It opens full screen, with no browser bars, and works with no signal.</p>
+    <p>Do this from the app's real web address, not from a file. A page opened straight out of the Files app cannot save anything.</p>
+  </div>
+
+  <h2 class="sec">Why a log disappears</h2>
+  <div class="prose">
+    <p>Your workouts are filed under the <b>web address</b> you opened the app from. Change the address, and the app looks brand new — the old log is still there, sitting behind the old address.</p>
+    <ul>
+      <li><b>One address, forever.</b> Bookmark it. Never re-upload the app to a new link.</li>
+      <li><b>Use the Home Screen icon</b>, not a Safari tab. Icon apps get their own protected storage.</li>
+      <li><b>Deleting the icon deletes the log.</b> So does Settings → Safari → Clear History and Website Data.</li>
+      <li><b>Private Browsing saves nothing</b>, ever.</li>
+    </ul>
+    <p>The Data tab tells you exactly which address you're saving to, and whether saving is working right now.</p>
+  </div>
+
+  <h2 class="sec">Updating without losing anything</h2>
+  <div class="prose">
+    <p>The rule: <b>replace the file at the same address.</b> Your log lives in the phone, not in the file, so swapping the file leaves every workout untouched.</p>
+    <p>On GitHub, from any device including this one:</p>
+    <ul>
+      <li>Open your repository and tap <b>index.html</b>.</li>
+      <li>Tap the <b>pencil</b> icon, select everything, paste the new version over it.</li>
+      <li>Tap <b>Commit changes</b>. Live in about a minute, same address.</li>
+      <li>Swipe this app away in the app switcher, reopen it, and check the version number below.</li>
+    </ul>
+    <p><b>Before any update, export a backup.</b> That single file restores everything, at any address, on any phone.</p>
+  </div>`;
+}
+
+/* ---------- 8. DATA VIEW ---------- */
+function renderData(){
+  const c=completed();
+  const snap=readSnapshot();
+  const sets=c.reduce((n,s)=>n+Object.values(s.entries).reduce((m,x)=>m+x.length,0),0);
+  const vol=c.reduce((n,s)=>n+volume(s),0);
+  document.getElementById("v-data").innerHTML=`
+  <h2 class="sec">Your numbers</h2>
+  <div class="prose">
+    <div class="kv"><span>Sessions logged</span><b class="num">${c.length}</b></div>
+    <div class="kv"><span>Sets logged</span><b class="num">${sets}</b></div>
+    <div class="kv"><span>Total weight moved</span><b class="num">${vol.toLocaleString()} lb</b></div>
+    <div class="kv"><span>App version</span><b class="num">${APP_VERSION}</b></div>
+  </div>
+
+  <h2 class="sec">Is it actually saving?</h2>
+  <div class="prose">
+    <div class="kv" style="border:none;padding-top:0">
+      <span>Status</span>
+      <b style="color:${memoryOnly?"var(--alert)":"var(--moss)"}">${memoryOnly?"Not saving":"Saving normally"}</b>
+    </div>
+    <div class="kv"><span>Saving to</span><b style="word-break:break-all;text-align:right">${esc(location.origin==="null"?"file (no address)":location.origin)}</b></div>
+    <div class="kv"><span>Last backup file</span><b>${S.lastBackup?daysAgo(S.lastBackup):"never"}</b></div>
+    ${storageNote?`<p style="margin-top:10px;color:var(--alert)">${esc(storageNote)}</p>`:
+      `<p style="margin-top:10px;color:var(--muted)">Your log is tied to that web address. Open the app from a <b>different</b> address and it will look empty — the data isn't gone, you're just at the wrong door.</p>`}
+  </div>
+
+  <h2 class="sec">Automatic snapshot</h2>
+  <div class="prose"><p>${snap
+    ? `A second copy was saved on this phone <b>${daysAgo(new Date(snap.at-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10))}</b>, holding <b>${snap.data.sessions.filter(x=>x.done).length} sessions</b>. It updates every time you finish a workout, so it's there if something goes wrong.`
+    : `No snapshot yet. One is saved automatically each time you finish a workout.`}</p></div>
+  ${snap?'<button class="btn ghost" id="snaprestore">Restore the snapshot</button>':""}
+
+  <h2 class="sec">Rest between sets</h2>
+  <div class="prose">
+    <div class="kv" style="border:none;padding-top:0">
+      <span>Timer length</span>
+      <span><button class="rest" data-r="60">60s</button> · <button class="rest" data-r="90">90s</button> · <button class="rest" data-r="120">2m</button></span>
+    </div>
+    <p style="margin-top:4px;color:var(--muted)">Currently <b class="num">${S.settings.rest}s</b>. Shorter rest keeps you inside 25 minutes; 90 seconds is a good default for these lifts.</p>
+  </div>
+
+  <h2 class="sec">Backup</h2>
+  <div class="prose"><p>Your log lives only on this phone. If you clear Safari's data or lose the phone, it's gone. Save a copy somewhere occasionally — the file is plain text and imports straight back.</p></div>
+  <button class="btn" id="exp">Export my data to a file</button>
+  <button class="btn ghost" id="copy">Copy my data to the clipboard</button>
+  <label class="btn ghost" style="display:block">Import from a file
+    <input type="file" id="imp" accept="application/json,.json" style="display:none">
+  </label>
+  <h2 class="sec">Danger zone</h2>
+  <button class="btn danger" id="wipe">Erase everything</button>
+  <p style="font-size:12.5px;color:var(--faint);text-align:center;margin:14px 0 0">Ledger v${APP_VERSION} · offline, local, yours</p>`;
+
+  document.querySelectorAll(".rest").forEach(b=>b.onclick=()=>{
+    S.settings.rest=+b.dataset.r; save(); renderData(); toast("Rest set to "+b.dataset.r+"s");
+  });
+  document.getElementById("exp").onclick=()=>{
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob); a.download="ledger-backup-"+todayISO()+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    S.lastBackup=todayISO(); save(); setTimeout(renderData,600);
+  };
+  document.getElementById("copy").onclick=async()=>{
+    try{ await navigator.clipboard.writeText(JSON.stringify(S)); toast("Copied — paste it into Notes or an email"); }
+    catch(e){ toast("Couldn't copy — use the file export"); return; }
+    S.lastBackup=todayISO(); save(); renderData();
+  };
+  document.getElementById("imp").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const d=JSON.parse(r.result);
+        if(!d.sessions) throw 0;
+        if(!confirm("Replace everything currently in the app with this backup?")) return;
+        S=migrate(Object.assign({sessions:[],active:null,settings:{rest:90}},d));
+        save(); snapshot(); renderAll(); toast("Backup restored");
+      }catch(err){ toast("That file isn't a Ledger backup"); }
+    };
+    r.readAsText(f);
+  };
+  const sr=document.getElementById("snaprestore");
+  if(sr) sr.onclick=()=>{
+    const snap2=readSnapshot(); if(!snap2) return;
+    if(!confirm("Replace what's in the app now with the snapshot? Export first if you're unsure.")) return;
+    S=migrate(Object.assign({sessions:[],active:null,settings:{rest:90}},snap2.data));
+    save(); renderAll(); toast("Snapshot restored");
+  };
+  document.getElementById("wipe").onclick=()=>{
+    if(!confirm("Erase every session permanently? Export first if you're unsure.")) return;
+    if(!confirm("Really erase? This cannot be undone.")) return;
+    S={sessions:[],active:null,settings:{rest:90}}; save(); renderAll(); toast("Everything erased");
+  };
+}
+
+/* ---------- 9. NAV + BOOT ---------- */
+function renderAll(){ renderToday(); renderHistory(); renderPlan(); renderData(); paintStreak(); }
+function paintStreak(){
+  const c=completed();
+  const wk=c.filter(s=>(new Date(todayISO())-new Date(s.date))/864e5 < 7).length;
+  document.getElementById("streak").textContent=wk+" / 4 this week";
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
+  if(b.dataset.v==="history") renderHistory();
+  if(b.dataset.v==="data") renderData();
+  if(b.dataset.v!=="today") document.getElementById("subline").textContent={
+    history:"Every set you've logged", plan:"Why the program looks like this", data:"Backup and settings"}[b.dataset.v];
+  else renderToday();
+  window.scrollTo(0,0);
+});
+load(); renderAll(); paintStreak();
+
+</script>
+</body>
+</html>
