@@ -70,27 +70,7 @@ body::after{
   content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.32;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.42'/%3E%3C/svg%3E");
 }
-header,main,nav,#timerbar,#sheet{position:fixed;inset:0;z-index:70;display:none}
-#sheet.on{display:block}
-#sheet .scrim{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .24s ease;
-  backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-#sheet.in .scrim{opacity:1}
-#sheet .panel{
-  position:absolute;left:0;right:0;bottom:0;max-height:84%;overflow-y:auto;overscroll-behavior:contain;
-  background:var(--surface);border-top:1px solid var(--rule);border-radius:22px 22px 0 0;
-  transform:translateY(100%);transition:transform .32s cubic-bezier(.22,.9,.3,1);
-  padding:8px var(--pad) calc(24px + env(safe-area-inset-bottom));
-  box-shadow:0 -20px 50px -20px #000;
-}
-#sheet.in .panel{transform:none}
-.grab{width:40px;height:4px;border-radius:2px;background:var(--rule);margin:6px auto 14px}
-.sheet-h{font-size:22px;font-weight:600;margin:0 0 2px}
-.hist-row{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--rule);font-size:14px;align-items:baseline}
-.hist-row .hd{color:var(--muted);width:76px;flex:none;font-size:13px}
-.hist-row .hs{flex:1;color:var(--ink)}
-.ghost-line[data-hist]{color:var(--muted)}
-.ghost-line[data-hist]:after{content:" ›";color:var(--brass);font-weight:700}
-#toast{position:relative;z-index:2}
+header,main,nav,#timerbar,#toast{position:relative;z-index:2}
 main>section{transition:transform .26s cubic-bezier(.22,.9,.3,1),opacity .2s ease}
 .display{font-family:"Avenir Next Condensed","Oswald","Arial Narrow",Impact,sans-serif}
 .num{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
@@ -520,7 +500,7 @@ const ALT={
 };
 
 /* ---------- 2. STORAGE (local only) ---------- */
-const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="2.0";
+const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="2.1";
 let memoryOnly=false, storageNote="", readError=false;
 let S={schema:2,sessions:[],active:null,lastBackup:null,pending:null,
   settings:{rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}};
@@ -1578,7 +1558,24 @@ function registerSW(){
   }).catch(()=>{ swState="failed"; });
 }
 
-load(); renderAll(); paintStreak(); registerSW();
+function bootFailure(err){
+  document.body.innerHTML=`<div style="padding:28px 20px;font:16px/1.5 -apple-system,sans-serif;color:#F4EDE4;background:#151110;min-height:100vh">
+    <h2 style="font-size:22px;margin:0 0 10px">Ledger hit an error</h2>
+    <p style="color:#A2968A;margin:0 0 18px">Your workouts are safe — they're stored separately from the app. Save a copy now, then reload.</p>
+    <button id="rescue" style="display:block;width:100%;padding:15px;border:0;border-radius:12px;background:#E2A542;color:#17120E;font:600 16px -apple-system,sans-serif;margin-bottom:10px">Save my data to a file</button>
+    <button id="reload" style="display:block;width:100%;padding:15px;border:1px solid #312722;border-radius:12px;background:none;color:#F4EDE4;font:16px -apple-system,sans-serif">Reload the app</button>
+    <pre style="margin-top:22px;color:#6E635A;font-size:11px;white-space:pre-wrap">${String(err&&err.message||err)}</pre></div>`;
+  document.getElementById("rescue").onclick=()=>{
+    try{
+      const blob=new Blob([localStorage.getItem("ledger.v1")||"{}"],{type:"application/json"});
+      const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="ledger-rescue.json"; document.body.appendChild(a); a.click(); a.remove();
+    }catch(e){ alert("Couldn't save. Open the app on a computer to recover."); }
+  };
+  document.getElementById("reload").onclick=()=>location.reload();
+}
+try{ load(); renderAll(); paintStreak(); registerSW(); }
+catch(err){ bootFailure(err); }
 
 </script>
 </body>
