@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ledger — training log</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -52,10 +52,14 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
+/* Keyboard users get a real focus ring; pointer users never see it. */
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px;border-radius:8px}
 /* The document itself never scrolls — only <main> does. That kills the
    rubber-band bounce that gives a web app away. */
 body{
-  position:fixed;inset:0;overflow:hidden;
+  /* height is re-set from visualViewport when the keyboard opens, so the
+     nav and timer stay visible instead of hiding underneath it. */
+  position:fixed;top:0;left:0;right:0;height:100%;overflow:hidden;
   display:flex;flex-direction:column;
   background:var(--ground);
   background-image:var(--glow);
@@ -131,13 +135,20 @@ main{
 /* ---------- set rows: the ledger ---------- */
 .sets{padding:2px var(--pad) 12px}
 .set-row{
-  display:grid;grid-template-columns:26px 1fr 1fr 46px;gap:6px;align-items:center;
+  display:grid;grid-template-columns:26px minmax(0,1fr) minmax(0,1fr) 46px;gap:6px;align-items:center;
   padding:7px 0;border-top:1px solid var(--rule);position:relative;
+  transition:background .25s;
 }
 .set-row.warm .stp input{color:var(--faint)}
 .set-row.warm .set-n{background:var(--brass-soft);color:var(--brass);border-radius:6px}
 .stp{display:flex;align-items:center;background:var(--sunk);border-radius:10px;overflow:hidden;border:1px solid transparent}
 .stp button{flex:none;width:34px;height:44px;font-size:19px;color:var(--muted);font-weight:500}
+@media (max-width:370px){
+  .set-row{grid-template-columns:22px minmax(0,1fr) minmax(0,1fr) 42px;gap:4px}
+  .stp button{width:27px;font-size:17px}
+  .stp input{font-size:15px;padding-left:0;padding-right:0}
+  .prbadge{right:46px}
+}
 .stp button:active{background:var(--rule);color:var(--ink)}
 .stp input{
   flex:1;min-width:0;width:100%;padding:11px 2px;background:none;border:none;text-align:center;font-size:17px;
@@ -184,11 +195,11 @@ main{
 }
 .set-row.logged .done{background:var(--brass);border-color:var(--brass);color:var(--on-brass)}
 .set-row.logged .stp{background:var(--brass-soft)}
-.set-row{transition:background .25s}
 .pr-flag{color:var(--brass);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 
 .row-tools{display:flex;gap:14px;padding:2px var(--pad) 14px}
 .row-tools button{font-size:13px;color:var(--muted);border-bottom:1px solid var(--rule);padding-bottom:2px}
+.row-tools button[disabled]{color:var(--faint);border-bottom-color:transparent;opacity:.5}
 .note{padding:0 var(--pad) 14px;font-size:13.5px;color:var(--muted);line-height:1.5}
 .note b{color:var(--ink);font-weight:600}
 
@@ -224,8 +235,6 @@ main{
 .sessbar #hdrback{font-size:15px;color:var(--brass);font-weight:600;padding:4px 10px 4px 0;margin-left:-2px}
 .sessbar .el{margin-left:auto;font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;font-size:17px;color:var(--muted)}
 .sessbar .el b{color:var(--ink);font-weight:600}
-.sess{display:flex;align-items:center;gap:6px;padding:11px var(--pad);border-bottom:1px solid var(--rule)}
-.sess:last-of-type{border-bottom:none}
 .sess-main{flex:1;text-align:left;min-width:0}
 .del-btn{width:40px;height:40px;flex:none;border-radius:10px;color:var(--faint);font-size:17px;border:1px solid var(--rule)}
 .del-btn:active{color:var(--alert);border-color:var(--alert)}
@@ -237,9 +246,8 @@ main{
   color:var(--ink);border-top:1px solid var(--brass);
 }
 #timerbar.on{display:flex}
-#timerbar .t{font-family:ui-monospace,Menlo,monospace;font-size:24px;font-variant-numeric:tabular-nums;min-width:62px}
+#timerbar .t{font-family:ui-monospace,Menlo,monospace;font-size:24px;font-variant-numeric:tabular-nums;min-width:62px;color:var(--brass)}
 #timerbar .sp{margin-left:auto;display:flex;gap:8px}
-#timerbar .t{color:var(--brass)}
 #timerbar .sp button{padding:9px 15px;border:1px solid var(--rule);border-radius:999px;font-size:13.5px;font-weight:600;color:var(--muted)}
 #timerbar .sp button:active{border-color:var(--brass);color:var(--brass)}
 
@@ -255,7 +263,8 @@ nav button .lb{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;fon
 nav button.on{color:var(--brass)}
 
 /* ---------- history / plan ---------- */
-.sess{padding:13px var(--pad);border-bottom:1px solid var(--rule);width:100%;text-align:left;display:block}
+.sess{display:flex;align-items:center;gap:8px;padding:12px var(--pad);
+  border-bottom:1px solid var(--rule);width:100%;text-align:left}
 .sess:last-child{border-bottom:none}
 .sess .d{font-size:13px;color:var(--muted)}
 .sess .n{font-weight:600;margin-top:2px}
@@ -306,13 +315,25 @@ h2.sec:first-child{margin-top:4px}
 #toast{
   position:fixed;left:50%;transform:translate(-50%,20px);bottom:calc(84px + env(safe-area-inset-bottom));
   background:var(--ink);color:var(--ground);padding:11px 18px;border-radius:999px;font-size:14px;
-  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:88vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s,bottom .2s;z-index:80;max-width:88vw;
+  text-align:center;display:flex;align-items:center;gap:12px;
 }
 #toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.act{pointer-events:auto}
+#toast button{
+  flex:none;color:var(--brass);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.08em;
+  padding:4px 2px;border-bottom:1px solid var(--brass);
+}
+/* while the rest bar is up, lift the toast clear of it */
+body.resting #toast{bottom:calc(140px + env(safe-area-inset-bottom))}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .tin{width:100%;padding:11px;border-radius:10px;border:1px solid var(--rule);background:var(--sunk);margin-top:6px;font-size:15px}
 .tog{padding:7px 15px;border:1px solid var(--rule);border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
 .tog.on{background:var(--brass);border-color:var(--brass);color:var(--on-brass)}
+/* Segmented pickers: the selected option was previously indistinguishable. */
+.unit,.rest{padding:6px 13px;border:1px solid var(--rule);border-radius:999px;
+  font-size:13px;font-weight:600;color:var(--muted);margin-left:5px}
+.unit.on,.rest.on{background:var(--brass);border-color:var(--brass);color:var(--on-brass)}
 .warn{background:var(--brass-soft);border:1px solid var(--brass);color:var(--ink);padding:12px;border-radius:11px;font-size:13.5px;margin-bottom:12px}
 </style>
 </head>
@@ -342,21 +363,21 @@ h2.sec:first-child{margin-top:4px}
   <span class="label" style="color:inherit;opacity:.7">Rest</span>
   <span class="t" id="tclock">1:30</span>
   <span class="sp">
-    <button id="tplus">+30s</button>
-    <button id="tstop">Skip</button>
+    <button id="tplus" aria-label="Add 30 seconds to the rest timer">+30s</button>
+    <button id="tstop" aria-label="Skip the rest timer">Skip</button>
   </span>
 </div>
 
-<nav>
-  <button data-v="today" class="on"><span class="ic">▤</span><span class="lb">Today</span></button>
-  <button data-v="history"><span class="ic">◷</span><span class="lb">History</span></button>
-  <button data-v="plan"><span class="ic">◈</span><span class="lb">Plan</span></button>
-  <button data-v="data"><span class="ic">⚙</span><span class="lb">Data</span></button>
+<nav aria-label="Sections">
+  <button data-v="today" class="on" aria-current="page"><span class="ic" aria-hidden="true">▤</span><span class="lb">Today</span></button>
+  <button data-v="history"><span class="ic" aria-hidden="true">◷</span><span class="lb">History</span></button>
+  <button data-v="plan"><span class="ic" aria-hidden="true">◈</span><span class="lb">Plan</span></button>
+  <button data-v="data"><span class="ic" aria-hidden="true">⚙</span><span class="lb">Data</span></button>
 </nav>
 
-<div id="sheet"><div class="scrim"></div><div class="panel"></div></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-label="Details"><div class="scrim"></div><div class="panel"></div></div>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ============================================================
@@ -500,10 +521,11 @@ const ALT={
 };
 
 /* ---------- 2. STORAGE (local only) ---------- */
-const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="2.1";
+const KEY="ledger.v1", SNAP="ledger.snapshot", APP_VERSION="2.2";
+const DEFAULTS={rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout",unit:"lb"};
 let memoryOnly=false, storageNote="", readError=false;
-let S={schema:2,sessions:[],active:null,lastBackup:null,pending:null,
-  settings:{rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}};
+let S={schema:3,sessions:[],active:null,lastBackup:null,pending:null,rest:null,
+  settings:Object.assign({},DEFAULTS)};
 
 /* Every future version of this app runs its saved data through migrate()
    before touching it. Unknown fields are kept, never dropped. */
@@ -511,11 +533,36 @@ function migrate(d){
   d.schema = d.schema || 1;
   if(!Array.isArray(d.sessions)) d.sessions=[];
   if(!Array.isArray(d.weights)) d.weights=[];
-  d.settings = Object.assign({rest:90,timerOn:false,healthOn:false,scTimer:"Rest Timer",scHealth:"Log Workout"}, d.settings||{});
+  d.settings = Object.assign({},DEFAULTS,d.settings||{});
+  if(d.settings.unit!=="kg") d.settings.unit="lb";
   if(d.active && !d.sessions.some(x=>x.id===d.active)) d.active=null;
   if(d.schema<2){ d.settings.timerOn=false; d.schema=2; }   // never leave the app to time a rest
+  if(d.schema<3){ d.rest=null; d.schema=3; }                // rest timers are now wall-clock
+  /* A session that names a day this build doesn't know would crash the
+     renderer, so park it as an orphan rather than trusting it. Anything
+     else malformed gets repaired in place — a single bad field should never
+     cost someone access to the whole log. */
+  d.sessions=d.sessions.filter(s=>s && typeof s==="object");
+  d.sessions.forEach(s=>{
+    if(!(s.dayId in DAY_INDEX)) s.dayId=null;
+    if(!s.entries || typeof s.entries!=="object") s.entries={};
+    Object.keys(s.entries).forEach(id=>{
+      if(!Array.isArray(s.entries[id])) delete s.entries[id];
+      else s.entries[id]=s.entries[id].filter(x=>x && typeof x==="object");
+    });
+    if(!Array.isArray(s.plan)) delete s.plan;
+    if(!s.open || typeof s.open!=="object") s.open={};
+    if(!s.id) s.id=uid();
+  });
+  d.weights=d.weights.filter(x=>x && typeof x==="object" && x.d && isFinite(Number(x.w)));
+  if(d.rest && (typeof d.rest!=="number" || d.rest<Date.now())) d.rest=null;
   return d;
 }
+/* Derived views of the log are rebuilt from scratch on every render, so they
+   get cached and thrown away whenever the log changes. */
+let _comp=null,_pr=null,_last=null;
+function bust(){ _comp=_pr=_last=null; }
+const unit=()=>S.settings.unit;
 function load(){
   try{ localStorage.setItem("ledger.probe","1"); localStorage.removeItem("ledger.probe"); }
   catch(e){
@@ -532,13 +579,22 @@ function load(){
     readError=true;
     storageNote="Your saved file couldn't be read. Check for an automatic snapshot below before logging anything new.";
   }
+  bust();
   if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 }
 function save(){
+  bust();
+  clearTimeout(save._t); save._t=null;
   if(memoryOnly) return;
   try{ localStorage.setItem(KEY,JSON.stringify(S)); }
   catch(e){ memoryOnly=true; toast("Storage is full or blocked — export your data now"); }
 }
+/* Typing a weight fired a full serialise-and-write on every keystroke, which
+   got visibly janky once the log was long. Coalesce it instead. */
+function saveSoon(){ bust(); clearTimeout(save._t); save._t=setTimeout(save,400); }
+function flush(){ if(save._t) save(); }
+addEventListener("pagehide",flush);
+addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") flush(); });
 function snapshot(){
   if(memoryOnly) return;
   try{ localStorage.setItem(SNAP,JSON.stringify({at:Date.now(),data:S})); }catch(e){}
@@ -559,14 +615,9 @@ function daysAgo(iso){
 }
 
 /* ---------- 3. HELPERS ---------- */
-function completed(){ return S.sessions.filter(s=>s.done).sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:(a.ts<b.ts?1:-1)); }
-function lastFor(exId, skipId){
-  for(const s of completed()){
-    if(s.id===skipId) continue;
-    const sets=work((s.entries||{})[exId]);
-    if(sets.length) return {date:s.date, sets};
-  }
-  return null;
+function completed(){
+  return _comp || (_comp = S.sessions.filter(s=>s.done && s.dayId)
+    .sort((a,b)=> a.date<b.date?1:a.date>b.date?-1:(a.ts<b.ts?1:-1)));
 }
 function work(sets){ return (sets||[]).filter(x=>x.done && !x.warm && x.r); }
 function score(x,ex){
@@ -574,8 +625,41 @@ function score(x,ex){
   if(ex && ex.unit==="sec") return r;
   return w>0 ? Math.round(w*(1+r/30)) : r;    // Epley estimate, or plain reps for bodyweight
 }
-/* Best working set ever recorded for a lift, ignoring one session if asked. */
+/* One pass over the log builds both lookups. completed() already excludes the
+   session in progress, so the old skipId argument was only ever needed when
+   re-reading a finished session — that rare case still walks the log. */
+function buildIndexes(){
+  const last={}, pr={};
+  completed().forEach(s=>{
+    Object.keys(s.entries||{}).forEach(id=>{
+      const sets=work(s.entries[id]); if(!sets.length) return;
+      if(!last[id]) last[id]={date:s.date, sets};
+      const ex=EX_INDEX[id];
+      sets.forEach(x=>{ const v=score(x,ex); if(v>(pr[id]||0)) pr[id]=v; });
+    });
+  });
+  _last=last; _pr=pr;
+}
+function lastFor(exId, skipId){
+  if(skipId && isFinished(skipId)) return slowLast(exId,skipId);
+  if(!_last) buildIndexes();
+  return _last[exId] || null;
+}
 function prFor(exId,skipId){
+  if(skipId && isFinished(skipId)) return slowPr(exId,skipId);
+  if(!_pr) buildIndexes();
+  return _pr[exId] || 0;
+}
+function isFinished(id){ return completed().some(s=>s.id===id); }
+function slowLast(exId,skipId){
+  for(const s of completed()){
+    if(s.id===skipId) continue;
+    const sets=work((s.entries||{})[exId]);
+    if(sets.length) return {date:s.date, sets};
+  }
+  return null;
+}
+function slowPr(exId,skipId){
   const ex=EX_INDEX[exId]; let best=0;
   completed().forEach(s=>{
     if(s.id===skipId) return;
@@ -583,11 +667,14 @@ function prFor(exId,skipId){
   });
   return best;
 }
-function bestSet(sets){
+/* The trend chart used to rank sets by a formula of its own, so a session
+   could top the chart without ever counting as a personal best. Same maths
+   now drives both, and warm-ups are excluded from both. */
+function bestSet(sets,ex){
   let best=null;
-  sets.forEach(x=>{
-    const score=(Number(x.w)||0)*(Number(x.r)||0) + (Number(x.r)||0);
-    if(!best || score>best.score) best={w:Number(x.w)||0,r:Number(x.r)||0,score};
+  work(sets).forEach(x=>{
+    const v=score(x,ex);
+    if(!best || v>best.v) best={w:Number(x.w)||0, r:Number(x.r)||0, v};
   });
   return best;
 }
@@ -595,8 +682,18 @@ function nextDayKey(){
   const c=completed();
   if(!c.length) return "A";
   const i=DAY_INDEX[c[0].dayId];
+  if(i==null) return "A";
   return PROGRAM[(i+1)%PROGRAM.length].key;
 }
+/* Monday-based week, so the counter in the header and the eight-week grid
+   below it can never disagree about what "this week" means. */
+function isoOf(d){ return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10); }
+function weekStartISO(){
+  const d=new Date(todayISO()+"T12:00:00");
+  d.setDate(d.getDate()-((d.getDay()+6)%7));
+  return isoOf(d);
+}
+function thisWeekCount(){ const ws=weekStartISO(); return completed().filter(s=>s.date>=ws).length; }
 function volume(s){
   let v=0;
   Object.entries(s.entries||{}).forEach(([id,sets])=>{
@@ -606,12 +703,26 @@ function volume(s){
   return Math.round(v);
 }
 function toTop(){ const m=document.querySelector("main"); if(m) m.scrollTop=0; }
-function toast(msg){
+/* toast(msg) announces; toast(msg, "Undo", fn) also offers a way back. */
+function toast(msg,actionLabel,onAction){
   const t=document.getElementById("toast");
-  t.textContent=msg; t.classList.add("on");
-  clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("on"),2200);
+  t.innerHTML="";
+  t.appendChild(Object.assign(document.createElement("span"),{textContent:msg}));
+  t.classList.toggle("act",!!onAction);
+  let life=2200;
+  if(onAction){
+    life=6000;
+    const b=Object.assign(document.createElement("button"),{textContent:actionLabel});
+    b.onclick=()=>{ t.classList.remove("on","act"); onAction(); };
+    t.appendChild(b);
+  }
+  t.classList.add("on");
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>t.classList.remove("on","act"),life);
 }
-function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+/* Haptics where the platform offers them; silently absent where it doesn't. */
+function buzz(p){ try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} }
 
 /* ---------- 3b. THE iOS BRIDGE ----------
    A web app cannot ring a locked phone or write to Apple Health.
@@ -661,25 +772,54 @@ function chime(){
   }catch(e){}
 }
 
-/* ---------- 4. REST TIMER ---------- */
-let timer=null,tleft=0;
+/* ---------- 4. REST TIMER ----------
+   Counting interval ticks meant the timer stopped whenever the phone locked
+   or the app went to the background, and came back reading whatever it had
+   got to. It now stores the moment rest ends and derives the rest, so it is
+   correct no matter what the browser did in between — including a reload. */
+let timer=null, restEnd=0;
 function startRest(sec){
   primeAudio();
   if(S.settings.timerOn && runShortcut(S.settings.scTimer,sec)) return;
-  tleft=sec; document.getElementById("timerbar").classList.add("on"); paintTimer();
-  clearInterval(timer);
-  timer=setInterval(()=>{
-    tleft--; paintTimer();
-    if(tleft<=0){ stopRest(); chime(); toast("Rest done — next set"); }
-  },1000);
+  restEnd=Date.now()+sec*1000;
+  S.rest=restEnd; save();
+  showRest(true); tickRest();
+  clearInterval(timer); timer=setInterval(tickRest,250);
 }
-function paintTimer(){
-  const m=Math.floor(Math.max(tleft,0)/60), s=Math.max(tleft,0)%60;
-  document.getElementById("tclock").textContent=m+":"+String(s).padStart(2,"0");
+function resumeRest(){
+  if(!S.rest || S.rest<=Date.now()){ S.rest=null; return; }
+  restEnd=S.rest; showRest(true); tickRest();
+  clearInterval(timer); timer=setInterval(tickRest,250);
 }
-function stopRest(){ clearInterval(timer); document.getElementById("timerbar").classList.remove("on"); }
+function tickRest(){
+  const left=Math.max(0,Math.round((restEnd-Date.now())/1000));
+  paintTimer(left);
+  if(left<=0){ stopRest(); chime(); buzz([120,60,120]); toast("Rest done — next set"); }
+}
+function paintTimer(left){
+  const el=document.getElementById("tclock"); if(!el) return;
+  el.textContent=Math.floor(left/60)+":"+String(left%60).padStart(2,"0");
+}
+function showRest(on){
+  document.getElementById("timerbar").classList.toggle("on",on);
+  document.body.classList.toggle("resting",on);
+}
+function stopRest(){
+  clearInterval(timer); timer=null; restEnd=0;
+  if(S.rest){ S.rest=null; save(); }
+  showRest(false);
+}
 document.getElementById("tstop").onclick=stopRest;
-document.getElementById("tplus").onclick=()=>{ tleft+=30; paintTimer(); };
+document.getElementById("tplus").onclick=()=>{
+  if(!restEnd) return;
+  restEnd+=30000; S.rest=restEnd; save(); tickRest();
+};
+/* Coming back from the lock screen: repaint immediately rather than waiting
+   for the next tick, and catch a rest that finished while we were away. */
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState!=="visible") return;
+  if(restEnd) tickRest(); else resumeRest();
+});
 
 /* live session clock in the header */
 let elapsedT=null;
@@ -714,9 +854,20 @@ function renderToday(){
   paintStreak();
   const a=S.active ? S.sessions.find(s=>s.id===S.active) : null;
   if(!a){ stopElapsed(); document.getElementById("pbar").classList.remove("on"); el.innerHTML=dayPicker(); bindPicker(el); document.getElementById("subline").textContent=sublineIdle(); return; }
-  startElapsed(a);
   const day=PROGRAM[DAY_INDEX[a.dayId]];
+  if(!day){   // an import or an older build left a day this version can't open
+    S.active=null; save(); renderToday();
+    toast("That session names a workout this version doesn't have");
+    return;
+  }
+  startElapsed(a);
   const plan=planOf(a);
+  /* Never render a card whose set rows the click handlers can't address. */
+  plan.forEach(id=>{
+    const ex=EX_INDEX[id];
+    if(ex && !Array.isArray(a.entries[id]))
+      a.entries[id]=Array.from({length:ex.sets},()=>({w:null,r:null,done:false,warm:false}));
+  });
   const doneCount=plan.filter(id=>(a.entries[id]||[]).some(x=>x.done)&&(a.entries[id]||[]).every(x=>x.done)).length;
   document.getElementById("subline").textContent=`${day.title} · ${doneCount} of ${plan.length} exercises done`;
   const pb=document.getElementById("pbar");
@@ -728,6 +879,14 @@ function renderToday(){
     const prev=lastFor(ex.id,a.id);
     const pr=prFor(ex.id,a.id);
     const sets=a.entries[ex.id]||[];
+    /* Once one set beat the old best, every later set beat it too and they
+       all lit up. Only the single best set in the session carries the flag. */
+    let prIdx=-1, high=pr;
+    sets.forEach((st,i)=>{
+      if(!st.done || st.warm) return;
+      const v=score(st,ex);
+      if(pr && v>high){ high=v; prIdx=i; }
+    });
     const allDone=sets.length&&sets.every(x=>x.done);
     const collapsed=allDone && !a.open?.[ex.id];
     const target=ex.unit==="sec" ? `${ex.low}–${ex.high} s` : `${ex.low}–${ex.high} reps`;
@@ -753,17 +912,17 @@ function renderToday(){
           ${S.notes&&S.notes[ex.id]?`<div class="ghost-line" style="color:var(--brass)">✎ ${esc(S.notes[ex.id])}</div>`:""}
         </div>
       </div>
-      <div class="sets">${sets.map((st,i)=>setRow(ex,st,i,prev,pr)).join("")}</div>
+      <div class="sets">${sets.map((st,i)=>setRow(ex,st,i,prev,i===prIdx)).join("")}</div>
       <div class="row-tools">
         <button data-act="add">+ set</button>
-        <button data-act="del">− set</button>
-        <button data-act="how">Form &amp; options</button>
+        <button data-act="del"${sets.length<2?" disabled":""}>− set</button>
+        <button data-act="how" aria-expanded="false">Form &amp; options</button>
       </div>
       <div class="note" style="display:none">
         <p><b>Setup.</b> ${esc(ex.load)}</p>
         <p><b>Form.</b> ${esc(ex.cue)}</p>
         <p><b>Progress.</b> ${esc(ex.prog)}</p>
-        ${pr?`<p><b>Your best.</b> <span class="num">${pr}</span> ${ex.unit==="sec"?"seconds":(prev&&prev.sets[0]&&prev.sets[0].w>0?"lb estimated max":"reps")}</p>`:""}
+        ${pr?`<p><b>Your best.</b> <span class="num">${pr}</span> ${ex.unit==="sec"?"seconds":(prev&&prev.sets[0]&&prev.sets[0].w>0?unit()+" estimated max":"reps")}</p>`:""}
         <p><span class="label">Your note</span></p>
         <input class="tin" data-note="${ex.id}" value="${esc((S.notes&&S.notes[ex.id])||"")}" placeholder="e.g. use the blue band, chair is too low">
         ${(ALT[ex.id]||[]).length?`<p style="margin-top:12px"><span class="label">Swap today for</span></p>
@@ -779,27 +938,33 @@ function renderToday(){
 }
 function setStr(x,ex){
   const u=ex.unit==="sec"?"s":"";
-  return Number(x.w)>0 ? `<span class="num">${x.w}×${x.r}${u}</span>` : `<span class="num">${x.r}${u||" reps"}</span>`;
+  /* Warm-ups are kept in the log but never counted, so say so on sight. */
+  const w=x.warm?`<span style="color:var(--faint)" title="warm-up">w</span>`:"";
+  const body = Number(x.w)>0 ? `${x.w}×${x.r}${u}` : `${x.r}${u||" reps"}`;
+  return `<span class="num"${x.warm?' style="color:var(--faint)"':""}>${body}</span>${w}`;
 }
-function setRow(ex,st,i,prev,pr){
+function setRow(ex,st,i,prev,isPR){
   const p=prev&&prev.sets[i];
   const wVal = st.w!=null ? st.w : (p?p.w:null);
   const rVal = st.r!=null ? st.r : (p?p.r:ex.low);
-  const isPR = st.done && !st.warm && pr && score(st,ex)>pr;
-  const wStep = ex.unit==="sec" ? 5 : 5, rStep = ex.unit==="sec" ? 5 : 1;
+  const wStep=5, rStep = ex.unit==="sec" ? 5 : 1;
+  const rWord = ex.unit==="sec" ? "seconds" : "reps";
+  const n=i+1;
   return `<div class="set-row ${st.done?"logged":""} ${st.warm?"warm":""}" data-i="${i}">
-    <button class="set-n" data-act="warm" title="Mark as warm-up">${st.warm?"W":(i+1)}</button>
+    <button class="set-n" data-act="warm" aria-pressed="${!!st.warm}"
+      aria-label="Set ${n}: mark as a warm-up set">${st.warm?"W":n}</button>
     <span class="stp">
-      <button data-adj="w" data-by="${-wStep}">−</button>
-      <input inputmode="decimal" data-f="w" value="${wVal??""}" placeholder="—">
-      <button data-adj="w" data-by="${wStep}">+</button>
+      <button data-adj="w" data-by="${-wStep}" aria-label="Set ${n}: ${wStep} ${unit()} less">−</button>
+      <input inputmode="decimal" data-f="w" value="${wVal??""}" placeholder="—" aria-label="Set ${n} weight in ${unit()}">
+      <button data-adj="w" data-by="${wStep}" aria-label="Set ${n}: ${wStep} ${unit()} more">+</button>
     </span>
     <span class="stp">
-      <button data-adj="r" data-by="${-rStep}">−</button>
-      <input inputmode="numeric" data-f="r" value="${rVal??""}" placeholder="${ex.low}">
-      <button data-adj="r" data-by="${rStep}">+</button>
+      <button data-adj="r" data-by="${-rStep}" aria-label="Set ${n}: ${rStep} fewer ${rWord}">−</button>
+      <input inputmode="numeric" data-f="r" value="${rVal??""}" placeholder="${ex.low}" aria-label="Set ${n} ${rWord}">
+      <button data-adj="r" data-by="${rStep}" aria-label="Set ${n}: ${rStep} more ${rWord}">+</button>
     </span>
-    <button class="done" data-act="done">${st.done?"✓":"○"}</button>
+    <button class="done" data-act="done" aria-pressed="${!!st.done}"
+      aria-label="${st.done?"Undo set "+n:"Log set "+n}">${st.done?"✓":"○"}</button>
     ${isPR?'<span class="prbadge">PR</span>':""}
   </div>`;
 }
@@ -860,7 +1025,7 @@ function consistency(){
     }
     cells+='</div>';
   }
-  const wk=c.filter(s=>(new Date(todayISO())-new Date(s.date))/864e5 < 7).length;
+  const wk=thisWeekCount();
   return `<div class="card" style="padding:14px var(--pad)">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
       <span class="label">Last 8 weeks</span>
@@ -901,12 +1066,14 @@ function bindSession(el,a,day){
     const reopen=card.querySelector('[data-act="reopen"]');
     if(reopen){ reopen.onclick=()=>{ a.open[ex.id]=true; save(); renderToday(); }; return; }
 
-    const setVal=(i,f,v)=>{
-      a.entries[ex.id][i][f]= (v===""||v==null) ? null : Math.max(0,Number(v));
-      save();
+    const setVal=(i,f,v,now)=>{
+      const n=Number(v);
+      a.entries[ex.id][i][f]= (v===""||v==null||!isFinite(n)) ? null : Math.max(0,n);
+      now ? save() : saveSoon();
     };
     card.querySelectorAll("input[data-f]").forEach(inp=>{
       inp.oninput=()=>setVal(+inp.closest(".set-row").dataset.i, inp.dataset.f, inp.value.trim());
+      inp.onblur=flush;
     });
     /* the steppers — the whole point is never touching the keyboard */
     card.querySelectorAll("[data-adj]").forEach(btn=>{
@@ -914,9 +1081,9 @@ function bindSession(el,a,day){
         const row=btn.closest(".set-row"), i=+row.dataset.i, f=btn.dataset.adj;
         const inp=row.querySelector(`input[data-f="${f}"]`);
         const base=inp.value===""?(f==="r"?ex.low:0):Number(inp.value);
-        const next=Math.max(0, base+Number(btn.dataset.by));
-        inp.value=next; setVal(i,f,next);
-        primeAudio();
+        const next=Math.max(0, Math.round((base+Number(btn.dataset.by))*100)/100);
+        inp.value=next; setVal(i,f,next,true);
+        primeAudio(); buzz(8);
       };
     });
     card.querySelectorAll('[data-act="warm"]').forEach(btn=>{
@@ -929,13 +1096,14 @@ function bindSession(el,a,day){
       btn.onclick=()=>{
         const row=btn.closest(".set-row"), i=+row.dataset.i, st=a.entries[ex.id][i];
         if(!st.done){
+          flush();
           const rIn=row.querySelector('[data-f="r"]'), wIn=row.querySelector('[data-f="w"]');
           if(st.r==null) st.r=Number(rIn.value||rIn.placeholder)||0;
           if(st.w==null && wIn.value!=="") st.w=Number(wIn.value)||0;
           st.done=true;
           const pr=prFor(ex.id,a.id);
           const beat = !st.warm && pr && score(st,ex)>pr;
-          primeAudio();
+          primeAudio(); buzz(beat?[20,40,20]:12);
           if(!st.warm) startRest(S.settings.rest);
           save();
           const allDone=a.entries[ex.id].every(x=>x.done);
@@ -952,12 +1120,20 @@ function bindSession(el,a,day){
       a.entries[ex.id].push({w:null,r:null,done:false,warm:false}); save(); renderToday();
     };
     card.querySelector('[data-act="del"]').onclick=()=>{
-      if(a.entries[ex.id].length>1){ a.entries[ex.id].pop(); save(); renderToday(); }
+      const sets=a.entries[ex.id];
+      if(sets.length<2){ toast("Every exercise keeps at least one set"); return; }
+      if(sets[sets.length-1].done){ toast("Unlog that set before removing it"); return; }
+      sets.pop(); save(); renderToday();
     };
     const gl=card.querySelector("[data-hist]");
     if(gl) gl.onclick=()=>liftSheet(gl.dataset.hist);
     const note=card.querySelector(".note"), how=card.querySelector('[data-act="how"]');
-    how.onclick=()=>{ const open=note.style.display!=="none"; note.style.display=open?"none":"block"; how.textContent=open?"Form & options":"Hide"; };
+    how.onclick=()=>{
+      const open=note.style.display!=="none";
+      note.style.display=open?"none":"block";
+      how.textContent=open?"Form & options":"Hide";
+      how.setAttribute("aria-expanded",String(!open));
+    };
     const ni=card.querySelector("[data-note]");
     if(ni) ni.onchange=()=>{
       S.notes=S.notes||{};
@@ -977,6 +1153,7 @@ function bindSession(el,a,day){
     });
   });
   el.querySelector("#finish").onclick=()=>{
+    flush();
     const any=Object.values(a.entries).some(sets=>sets.some(x=>x.done));
     if(!any){ toast("Log at least one set first"); return; }
     Object.keys(a.entries).forEach(id=>{ a.entries[id]=a.entries[id].filter(x=>x.done); if(!a.entries[id].length) delete a.entries[id]; });
@@ -984,19 +1161,28 @@ function bindSession(el,a,day){
     a.mins=Math.min(120,Math.max(1,Math.round((Date.now()-(a.start||Date.now()))/6e4)));
     S.active=null; stopRest(); stopElapsed(); keepAwake(false);
     if(S.settings.healthOn) S.pending={mins:a.mins,day:a.dayId};
-    save(); snapshot();
-    toast("Saved · "+a.mins+" min · "+volume(a).toLocaleString()+" lb moved");
+    save(); snapshot(); buzz([30,60,30]);
+    toast("Saved · "+a.mins+" min · "+volume(a).toLocaleString()+" "+unit()+" moved");
     renderToday(); renderHistory();
   };
-  el.querySelector("#scrap").onclick=()=>{
-    if(!confirm("Delete this session? Logged sets will be lost.")) return;
-    S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null; stopRest(); stopElapsed(); keepAwake(false); save(); renderToday();
+  el.querySelector("#scrap").onclick=async()=>{
+    const n=Object.values(a.entries).reduce((t,sets)=>t+sets.filter(x=>x.done).length,0);
+    if(!await ask("Discard this session?",
+      n ? `${n} logged set${n===1?"":"s"} will be removed. You'll have a few seconds to undo.`
+        : "Nothing has been logged yet, so nothing is lost.",
+      "Discard", true)) return;
+    const keep=a;
+    S.sessions=S.sessions.filter(s=>s.id!==a.id); S.active=null;
+    stopRest(); stopElapsed(); keepAwake(false); save(); renderToday();
+    toast("Session discarded","Undo",()=>{
+      S.sessions.push(keep); S.active=keep.id; save(); renderToday(); toTop();
+    });
   };
 }
 
 /* ---------- 5b. THE LIFT SHEET ----------
    Full history for one lift, without leaving the workout. */
-let sheetOpen=false;
+let sheetOpen=false, sheetResolve=null;
 function openSheet(html){
   const sh=document.getElementById("sheet");
   sh.querySelector(".panel").innerHTML='<div class="grab"></div>'+html;
@@ -1009,6 +1195,22 @@ function closeSheet(){
   const sh=document.getElementById("sheet");
   sh.classList.remove("in"); sheetOpen=false;
   setTimeout(()=>sh.classList.remove("on"),280);
+  if(sheetResolve){ const r=sheetResolve; sheetResolve=null; r(false); }
+}
+/* Destructive actions used to go through the browser's confirm(), which
+   freezes the page, ignores the app's styling and looks like a website
+   caught you out. This is the same question, asked in the app's own voice. */
+function ask(title,body,okLabel,danger){
+  return new Promise(resolve=>{
+    openSheet(`<h3 class="sheet-h">${esc(title)}</h3>
+      <p style="color:var(--muted);margin:6px 0 18px;font-size:14.5px;line-height:1.5">${esc(body)}</p>
+      <button class="btn ${danger?"danger":"brass"}" id="askok">${esc(okLabel)}</button>
+      <button class="btn ghost" id="askno">Cancel</button>`);
+    sheetResolve=resolve;
+    const done=v=>{ sheetResolve=null; closeSheet(); resolve(v); };
+    document.getElementById("askok").onclick=()=>done(true);
+    document.getElementById("askno").onclick=()=>done(false);
+  });
 }
 document.querySelector("#sheet .scrim").onclick=closeSheet;
 /* flick the panel down to dismiss */
@@ -1042,7 +1244,7 @@ function liftSheet(id){
   const pts=rows.slice().reverse().map(r=>Math.max(...r.sets.map(x=>score(x,ex))));
   const pr=prFor(id);
   const unitWord = ex.unit==="sec" ? "second hold"
-    : (rows[0] && rows[0].sets.some(x=>Number(x.w)>0) ? "lb estimated max" : "reps");
+    : (rows[0] && rows[0].sets.some(x=>Number(x.w)>0) ? unit()+" estimated max" : "reps");
   const totalSets=rows.reduce((n,r)=>n+r.sets.length,0);
   openSheet(`
     <h3 class="sheet-h">${esc(ex.name)}</h3>
@@ -1072,29 +1274,29 @@ function bodyweightCard(){
     const past=ws.filter(x=>x.d<=cut).pop() || ws[0];
     const dv=+(cur.w-past.w).toFixed(1);
     const days=Math.round((new Date(cur.d)-new Date(past.d))/864e5);
-    if(days>0) delta=`<span style="color:${Math.abs(dv)<0.2?"var(--muted)":(dv>0?"var(--brass)":"var(--moss)")}">${dv>0?"+":""}${dv} lb over ${days} day${days===1?"":"s"}</span>`;
+    if(days>0) delta=`<span style="color:${Math.abs(dv)<0.2?"var(--muted)":(dv>0?"var(--brass)":"var(--moss)")}">${dv>0?"+":""}${dv} ${unit()} over ${days} day${days===1?"":"s"}</span>`;
   }
-  const start = cur ? cur.w : 170;
+  const start = cur ? cur.w : (unit()==="kg" ? 77 : 170);
   return `<h2 class="sec">Bodyweight</h2>
   <div class="card" style="padding:14px var(--pad)">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:${ws.length>1?"10px":"14px"}">
-      <span style="font-size:30px;font-weight:600" class="num display">${cur?cur.w:"—"}<span style="font-size:15px;color:var(--muted);font-weight:400"> lb</span></span>
+      <span style="font-size:30px;font-weight:600" class="num display">${cur?cur.w:"—"}<span style="font-size:15px;color:var(--muted);font-weight:400"> ${unit()}</span></span>
       <span style="font-size:13px">${delta || `<span style="color:var(--faint)">${cur?"logged "+daysAgo(cur.d):"nothing logged yet"}</span>`}</span>
     </div>
     ${ws.length>1?spark(ws.map(x=>x.w)):""}
     <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
       <span class="stp" style="flex:1">
-        <button data-bw="-1">−</button>
-        <input inputmode="decimal" id="bwin" value="${start}">
-        <button data-bw="1">+</button>
+        <button data-bw="-1" aria-label="One ${unit()} less">−</button>
+        <input inputmode="decimal" id="bwin" value="${start}" aria-label="Today's bodyweight in ${unit()}">
+        <button data-bw="1" aria-label="One ${unit()} more">+</button>
       </span>
       <button class="btn brass" style="margin:0;width:auto;padding:13px 20px" id="bwlog">Log today</button>
     </div>
     ${ws.length?`<div style="margin-top:10px">${ws.slice(-6).reverse().map(x=>
       `<div class="hist-row" style="padding:7px 0">
         <span class="hd">${fmtDate(x.d)}</span>
-        <span class="hs num">${x.w} lb</span>
-        <button class="del-btn" data-bwdel="${x.d}" style="width:30px;height:30px;font-size:13px">✕</button>
+        <span class="hs num">${x.w} ${unit()}</span>
+        <button class="del-btn" data-bwdel="${x.d}" style="width:30px;height:30px;font-size:13px" aria-label="Delete the ${fmtDate(x.d)} entry">✕</button>
       </div>`).join("")}</div>`:""}
   </div>`;
 }
@@ -1122,7 +1324,7 @@ function renderHistory(){
         <div class="sess-main" data-s="${s.id}">
           <div class="d">${fmtDate(s.date)}</div>
           <div class="n">Day ${s.dayId} — ${esc(d?d.title:"")}</div>
-          <div class="v">${nSets} sets${s.mins?` · ${s.mins} min`:""} · ${volume(s).toLocaleString()} lb</div>
+          <div class="v">${nSets} sets${s.mins?` · ${s.mins} min`:""} · ${volume(s).toLocaleString()} ${unit()}</div>
         </div>
         <button class="del-btn" data-del="${s.id}" aria-label="Delete session">✕</button>
       </div>
@@ -1139,12 +1341,16 @@ function renderHistory(){
   el.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
     el.querySelector(`[data-d="${b.dataset.s}"]`).classList.toggle("on");
   });
-  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=ev=>{
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async ev=>{
     ev.stopPropagation();
-    const s0=S.sessions.find(x=>x.id===b.dataset.del);
-    if(!confirm(`Delete the ${fmtDate(s0.date)} session? This can't be undone.`)) return;
-    S.sessions=S.sessions.filter(x=>x.id!==b.dataset.del); save(); renderHistory(); renderToday();
-    toast("Session deleted");
+    const s0=S.sessions.find(x=>x.id===b.dataset.del); if(!s0) return;
+    const n=Object.values(s0.entries||{}).reduce((t,x)=>t+x.length,0);
+    if(!await ask(`Delete ${fmtDate(s0.date)}?`,
+      `${n} set${n===1?"":"s"} from this session will be removed.`,"Delete",true)) return;
+    S.sessions=S.sessions.filter(x=>x.id!==s0.id); save(); renderHistory(); renderToday();
+    toast("Session deleted","Undo",()=>{
+      S.sessions.push(s0); save(); renderHistory(); renderToday(); toast("Session restored");
+    });
   });
   const bw=el.querySelector("#bwin");
   if(bw){
@@ -1153,10 +1359,11 @@ function renderHistory(){
     });
     el.querySelector("#bwlog").onclick=()=>{
       const v=Number(bw.value);
-      if(!v||v<40||v>800){ toast("Enter a weight in pounds"); return; }
+      const lo=unit()==="kg"?20:45, hi=unit()==="kg"?350:800;
+      if(!isFinite(v)||v<lo||v>hi){ toast(`Enter a bodyweight between ${lo} and ${hi} ${unit()}`); return; }
       S.weights=(S.weights||[]).filter(x=>x.d!==todayISO());
       S.weights.push({d:todayISO(), w:+v.toFixed(1)});
-      save(); snapshot(); renderHistory(); toast("Logged "+v+" lb");
+      save(); snapshot(); renderHistory(); toast("Logged "+v+" "+unit());
     };
     el.querySelectorAll("[data-bwdel]").forEach(b=>b.onclick=()=>{
       S.weights=(S.weights||[]).filter(x=>x.d!==b.dataset.bwdel);
@@ -1194,12 +1401,15 @@ function drawExercise(id){
   const box=document.getElementById("exbox"); if(!box) return;
   const ex=EX_INDEX[id]||{name:id,unit:"reps",perSide:false};
   const rows=completed().filter(s=>s.entries[id]).reverse()
-    .map(s=>({date:s.date, best:bestSet(s.entries[id]), sets:s.entries[id]}));
-  const pts=rows.map(r=> r.best.w>0 ? Math.round(r.best.w*(1+r.best.r/30)) : r.best.r);
-  const unit = rows.length && rows[rows.length-1].best.w>0 ? "est. 1-rep max (lb)" : (ex.unit==="sec"?"best hold (sec)":"best set (reps)");
+    .map(s=>({date:s.date, best:bestSet(s.entries[id],ex), sets:s.entries[id]}))
+    .filter(r=>r.best);
+  const pts=rows.map(r=>r.best.v);
+  const metric = rows.length && rows[rows.length-1].best.w>0
+    ? `est. 1-rep max (${unit()})`
+    : (ex.unit==="sec"?"best hold (sec)":"best set (reps)");
   let h=`<div class="card-head"><div style="flex:1">
       <h3 class="ex-name">${esc(ex.name)}</h3>
-      <div class="ex-meta">${rows.length} session${rows.length===1?"":"s"} · trend of ${unit}</div>
+      <div class="ex-meta">${rows.length?`${rows.length} session${rows.length===1?"":"s"} · trend of ${metric}`:"Only warm-up sets logged so far"}</div>
     </div></div>`;
   h+=`<div style="padding:0 16px 8px">${spark(pts)}</div>`;
   h+=`<div class="detail on" style="padding-bottom:14px">`+
@@ -1315,7 +1525,7 @@ function renderPlan(){
       <li>Tap <b>Commit changes</b>. Live in about a minute, same address.</li>
       <li>Swipe this app away in the app switcher, reopen it, and check the version number in the Data tab.</li>
     </ul>
-    <p style="color:var(--muted)">The app now checks for a newer copy of itself every time it opens with a connection, and falls back to the copy on your phone when there isn't one. That's why there's no version number to bump any more.</p>
+    <p style="color:var(--muted)">The app checks for a newer copy of itself every time it opens with a connection, and falls back to the copy on your phone when there isn't one. The version number in the Data tab tells you which copy you're actually running — check it after an update.</p>
     <p><b>Before any update, export a backup.</b> That single file restores everything, at any address, on any phone.</p>
   </div>`;
 }
@@ -1334,7 +1544,7 @@ function renderData(){
   <div class="prose">
     <div class="kv"><span>Sessions logged</span><b class="num">${c.length}</b></div>
     <div class="kv"><span>Sets logged</span><b class="num">${sets}</b></div>
-    <div class="kv"><span>Total weight moved</span><b class="num">${vol.toLocaleString()} lb</b></div>
+    <div class="kv"><span>Total weight moved</span><b class="num">${vol.toLocaleString()} ${unit()}</b></div>
     <div class="kv"><span>Time trained</span><b class="num">${mins>=60?Math.floor(mins/60)+" h "+(mins%60)+" min":mins+" min"}</b></div>
     <div class="kv"><span>Average session</span><b class="num">${avg?avg+" min":"—"}</b></div>
     <div class="kv"><span>App version</span><b class="num">${APP_VERSION}</b></div>
@@ -1363,11 +1573,21 @@ function renderData(){
     : `No snapshot yet. One is saved automatically each time you finish a workout.`}</p></div>
   ${snap?'<button class="btn ghost" id="snaprestore">Restore the snapshot</button>':""}
 
+  <h2 class="sec">Units</h2>
+  <div class="prose">
+    <div class="kv" style="border:none;padding-top:0">
+      <span>Weights shown in</span>
+      <span><button class="unit${unit()==="lb"?" on":""}" data-u="lb" aria-pressed="${unit()==="lb"}">lb</button>
+            <button class="unit${unit()==="kg"?" on":""}" data-u="kg" aria-pressed="${unit()==="kg"}">kg</button></span>
+    </div>
+    <p style="margin-top:8px;color:var(--muted)">This changes the label only. Numbers you've already logged stay exactly as you typed them — nothing is converted, so switching won't quietly rewrite your history.</p>
+  </div>
+
   <h2 class="sec">Rest between sets</h2>
   <div class="prose">
     <div class="kv" style="border:none;padding-top:0">
       <span>Timer length</span>
-      <span><button class="rest" data-r="60">60s</button> · <button class="rest" data-r="90">90s</button> · <button class="rest" data-r="120">2m</button></span>
+      <span>${[60,90,120].map(r=>`<button class="rest${S.settings.rest===r?" on":""}" data-r="${r}" aria-pressed="${S.settings.rest===r}">${r===120?"2m":r+"s"}</button>`).join("")}</span>
     </div>
     <p style="margin-top:4px;color:var(--muted)">Currently <b class="num">${S.settings.rest}s</b>. Shorter rest keeps you inside 25 minutes; 90 seconds is a good default for these lifts.</p>
   </div>
@@ -1377,12 +1597,12 @@ function renderData(){
     <p>A web app can't ring a locked phone or write to Apple Health. Apple's free <b>Shortcuts</b> app can do both. Build each shortcut once, switch it on here, and this app hands the job over.</p>
     <div class="kv" style="border:none;padding-top:6px">
       <span><b>Rest timer via Shortcuts</b><br><span style="color:var(--muted);font-size:13px">Rings with the phone locked, but jumps out of this app. Off by default — the built-in timer chimes without leaving.</span></span>
-      <button class="tog ${S.settings.timerOn?"on":""}" data-t="timerOn">${S.settings.timerOn?"On":"Off"}</button>
+      <button class="tog ${S.settings.timerOn?"on":""}" data-t="timerOn" aria-pressed="${!!S.settings.timerOn}">${S.settings.timerOn?"On":"Off"}</button>
     </div>
     <input class="tin" id="scTimer" value="${esc(S.settings.scTimer)}" placeholder="Shortcut name">
     <div class="kv" style="margin-top:14px">
       <span><b>Log to Apple Health</b><br><span style="color:var(--muted);font-size:13px">One optional tap after a workout. Never automatic.</span></span>
-      <button class="tog ${S.settings.healthOn?"on":""}" data-t="healthOn">${S.settings.healthOn?"On":"Off"}</button>
+      <button class="tog ${S.settings.healthOn?"on":""}" data-t="healthOn" aria-pressed="${!!S.settings.healthOn}">${S.settings.healthOn?"On":"Off"}</button>
     </div>
     <input class="tin" id="scHealth" value="${esc(S.settings.scHealth)}" placeholder="Shortcut name">
     <p style="margin-top:12px;color:var(--muted);font-size:13px">The names above must match your shortcuts exactly. Step-by-step build instructions are in the Plan tab.</p>
@@ -1401,6 +1621,11 @@ function renderData(){
 
   document.querySelectorAll(".tog").forEach(b=>b.onclick=()=>{
     S.settings[b.dataset.t]=!S.settings[b.dataset.t]; save(); renderData();
+  });
+  document.querySelectorAll(".unit").forEach(b=>b.onclick=()=>{
+    if(S.settings.unit===b.dataset.u) return;
+    S.settings.unit=b.dataset.u; save(); renderData(); renderHistory();
+    toast("Weights now shown in "+b.dataset.u);
   });
   ["scTimer","scHealth"].forEach(k=>{
     const i=document.getElementById(k);
@@ -1423,29 +1648,46 @@ function renderData(){
     S.lastBackup=todayISO(); save(); renderData();
   };
   document.getElementById("imp").onchange=e=>{
-    const f=e.target.files[0]; if(!f) return;
+    const f=e.target.files[0];
+    e.target.value="";   // otherwise picking the same file twice fires nothing
+    if(!f) return;
     const r=new FileReader();
-    r.onload=()=>{
+    r.onerror=()=>toast("Couldn't read that file");
+    r.onload=async()=>{
+      let d;
+      try{ d=JSON.parse(r.result); }
+      catch(err){ toast("That file isn't valid JSON"); return; }
+      if(!d || typeof d!=="object" || !Array.isArray(d.sessions)){
+        toast("That file isn't a Ledger backup"); return;
+      }
+      const n=d.sessions.filter(x=>x && x.done).length;
+      if(!await ask("Replace everything in the app?",
+        `This backup holds ${n} finished session${n===1?"":"s"}. Whatever is in the app now is replaced — a snapshot is kept first.`,
+        "Replace", true)) return;
+      snapshot();   // the current log, in case the import turns out to be wrong
       try{
-        const d=JSON.parse(r.result);
-        if(!d.sessions) throw 0;
-        if(!confirm("Replace everything currently in the app with this backup?")) return;
         S=migrate(Object.assign({sessions:[],active:null},d));
-        save(); snapshot(); renderAll(); toast("Backup restored");
-      }catch(err){ toast("That file isn't a Ledger backup"); }
+      }catch(err){ toast("That backup couldn't be loaded"); return; }
+      save(); renderAll(); toast("Backup restored");
     };
     r.readAsText(f);
   };
   const sr=document.getElementById("snaprestore");
-  if(sr) sr.onclick=()=>{
+  if(sr) sr.onclick=async()=>{
     const snap2=readSnapshot(); if(!snap2) return;
-    if(!confirm("Replace what's in the app now with the snapshot? Export first if you're unsure.")) return;
+    const n=(snap2.data.sessions||[]).filter(x=>x && x.done).length;
+    if(!await ask("Restore the snapshot?",
+      `The snapshot holds ${n} finished session${n===1?"":"s"} and replaces what's in the app now. Export first if you're unsure.`,
+      "Restore", true)) return;
     S=migrate(Object.assign({sessions:[],active:null},snap2.data));
     save(); renderAll(); toast("Snapshot restored");
   };
-  document.getElementById("wipe").onclick=()=>{
-    if(!confirm("Erase every session permanently? Export first if you're unsure.")) return;
-    if(!confirm("Really erase? This cannot be undone.")) return;
+  document.getElementById("wipe").onclick=async()=>{
+    const n=completed().length;
+    if(!await ask("Erase everything?",
+      `All ${n} session${n===1?"":"s"}, your bodyweight log and your notes are deleted from this phone. This can't be undone — export a backup first if you're unsure.`,
+      "Erase everything", true)) return;
+    snapshot();   // last line of defence if this was a mistake
     S=migrate({sessions:[],active:null}); save(); renderAll(); toast("Everything erased");
   };
 }
@@ -1453,17 +1695,19 @@ function renderData(){
 /* ---------- 9. NAV + BOOT ---------- */
 function renderAll(){ renderToday(); renderHistory(); renderPlan(); renderData(); paintStreak(); }
 function paintStreak(){
-  const c=completed();
-  const wk=c.filter(s=>(new Date(todayISO())-new Date(s.date))/864e5 < 7).length;
-  document.getElementById("streak").textContent=wk+" / 4 this week";
+  document.getElementById("streak").textContent=thisWeekCount()+" / 4 this week";
 }
 const VIEWS=["today","history","plan","data"];
-let curView="today";
+const SUBLINE={history:"Every set you've logged", plan:"Why the program looks like this", data:"Backup and settings"};
+let curView="today", switching=false;
 const mainEl=document.querySelector("main");
 const slide=()=>document.querySelector(".view.on");
 
+/* Two quick taps used to start two overlapping transitions, and whichever
+   timeout landed second left the view and the nav disagreeing. One at a time. */
 function switchView(v,dir){
-  if(v===curView) return;
+  if(v===curView || switching || !VIEWS.includes(v)) return;
+  switching=true;
   const from=VIEWS.indexOf(curView), to=VIEWS.indexOf(v);
   const d = dir!=null ? dir : (to>from?1:-1);
   const sOut=slide();
@@ -1471,13 +1715,16 @@ function switchView(v,dir){
   sOut.style.transform=`translateX(${d*-26}px)`; sOut.style.opacity="0";
   setTimeout(()=>{
     curView=v;
-    document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.v===v));
+    document.querySelectorAll("nav button").forEach(x=>{
+      const on=x.dataset.v===v;
+      x.classList.toggle("on",on);
+      if(on) x.setAttribute("aria-current","page"); else x.removeAttribute("aria-current");
+    });
     document.querySelectorAll(".view").forEach(x=>x.classList.toggle("on",x.id==="v-"+v));
     if(v==="history") renderHistory();
-    if(v==="data") renderData();
+    else if(v==="data") renderData();
     if(v==="today") renderToday();
-    else document.getElementById("subline").textContent={
-      history:"Every set you've logged", plan:"Why the program looks like this", data:"Backup and settings"}[v];
+    else document.getElementById("subline").textContent=SUBLINE[v];
     toTop();
     sOut.style.cssText="";
     const sIn=slide();
@@ -1486,24 +1733,25 @@ function switchView(v,dir){
     requestAnimationFrame(()=>{
       sIn.style.transition="transform .24s cubic-bezier(.22,.9,.3,1),opacity .2s ease";
       sIn.style.transform="translateX(0)"; sIn.style.opacity="1";
+      setTimeout(()=>{ switching=false; },240);
     });
   },140);
 }
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>switchView(b.dataset.v));
 
-/* ---------- 11. GESTURES ----------
+/* ---------- 10. GESTURES ----------
    Edge-swipe from the left drags the screen back, the way iOS does. */
-let gx=0,gy=0,gEdge=false,gDrag=false,gActive=false;
+let gx=0,gy=0,gT=0,gEdge=false,gDrag=false,gActive=false;
 function resetDrag(anim){
   const v=slide(); if(!v) return;
   v.style.transition=anim?"transform .28s cubic-bezier(.22,.9,.3,1),opacity .2s ease":"none";
   v.style.transform="translateX(0)"; v.style.opacity="1";
 }
 document.addEventListener("touchstart",e=>{
-  if(e.touches.length!==1 || sheetOpen){ gActive=false; return; }
+  if(e.touches.length!==1 || sheetOpen || switching){ gActive=false; return; }
   const t=e.touches[0];
-  if(t.target.closest("input,select,textarea,.stp")){ gActive=false; return; }
-  gx=t.clientX; gy=t.clientY; gEdge=gx<36; gDrag=false; gActive=true;
+  if(t.target.closest("input,select,textarea,.stp,nav,#timerbar")){ gActive=false; return; }
+  gx=t.clientX; gy=t.clientY; gT=Date.now(); gEdge=gx<36; gDrag=false; gActive=true;
 },{passive:true});
 document.addEventListener("touchmove",e=>{
   if(!gActive) return;
@@ -1520,25 +1768,29 @@ document.addEventListener("touchmove",e=>{
   }
 },{passive:true});
 document.addEventListener("touchend",e=>{
-  if(!gActive){ return; }
+  if(!gActive) return;
   gActive=false;
-  const t=e.changedTouches[0], dx=t.clientX-gx;
-  if(!gDrag){ return; }
-  if(gEdge && dx>64){
+  if(!gDrag) return;
+  const t=e.changedTouches[0], dx=t.clientX-gx, dy=t.clientY-gy;
+  if(gEdge){
     resetDrag(true);
-    if(curView==="today" && S.active){ document.getElementById("hdrback").click(); }
-    else { const i=VIEWS.indexOf(curView); if(i>0) switchView(VIEWS[i-1],-1); }
+    if(dx>64){
+      if(curView==="today" && S.active){ document.getElementById("hdrback").click(); }
+      else { const i=VIEWS.indexOf(curView); if(i>0) switchView(VIEWS[i-1],-1); }
+    }
     return;
   }
-  if(gEdge){ resetDrag(true); return; }
-  if(Math.abs(dx)>68){
+  /* A tab change needs a deliberate, mostly-horizontal, reasonably quick
+     flick — otherwise a slow diagonal scroll would throw you off the page. */
+  const quick=Date.now()-gT < 700;
+  if(Math.abs(dx)>68 && Math.abs(dx)>Math.abs(dy)*1.6 && quick){
     const i=VIEWS.indexOf(curView);
     if(dx<0 && i<VIEWS.length-1) switchView(VIEWS[i+1],1);
     else if(dx>0 && i>0) switchView(VIEWS[i-1],-1);
   }
 },{passive:true});
 document.addEventListener("touchcancel",()=>{ if(gActive){ gActive=false; resetDrag(true); } },{passive:true});
-/* ---------- 10. OFFLINE ---------- */
+/* ---------- 11. OFFLINE ---------- */
 let swState="unsupported";
 function registerSW(){
   if(!("serviceWorker" in navigator) || location.protocol==="file:") return;
@@ -1558,6 +1810,28 @@ function registerSW(){
   }).catch(()=>{ swState="failed"; });
 }
 
+/* ---------- 12. KEYBOARD ----------
+   The body is position:fixed, so iOS won't scroll a focused field above the
+   keyboard by itself — the row you're typing into ends up underneath it.
+   Shrinking the body to the visual viewport keeps the nav, the rest bar and
+   the active row all visible. */
+(function(){
+  const vv=window.visualViewport;
+  if(!vv) return;
+  let raf=0;
+  const fit=()=>{
+    cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>{ document.body.style.height=vv.height+"px"; });
+  };
+  vv.addEventListener("resize",fit);
+  fit();
+})();
+document.addEventListener("focusin",e=>{
+  const t=e.target;
+  if(!t || !t.matches || !t.matches("input,select,textarea")) return;
+  setTimeout(()=>{ try{ t.scrollIntoView({block:"center",behavior:"smooth"}); }catch(err){} },260);
+});
+
 function bootFailure(err){
   document.body.innerHTML=`<div style="padding:28px 20px;font:16px/1.5 -apple-system,sans-serif;color:#F4EDE4;background:#151110;min-height:100vh">
     <h2 style="font-size:22px;margin:0 0 10px">Ledger hit an error</h2>
@@ -1574,7 +1848,13 @@ function bootFailure(err){
   };
   document.getElementById("reload").onclick=()=>location.reload();
 }
-try{ load(); renderAll(); paintStreak(); registerSW(); }
+try{
+  load();
+  renderAll();
+  resumeRest();                                    // a rest that outlived a reload
+  if(!readSnapshot() && completed().length) snapshot();  // never go un-snapshotted
+  registerSW();
+}
 catch(err){ bootFailure(err); }
 
 </script>
